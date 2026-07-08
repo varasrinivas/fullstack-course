@@ -56,6 +56,18 @@ order-ticket header, analogy beat → mapping table → dual-caption SVG diagram
 dual-path lab → 3-question quiz → "In the food court…" recap. Every module m02–m18
 must match that shape (the validator enforces it).
 
+## Live course
+
+The player is deployed on the learnings hub:
+**https://learnings.varasrinivas.com/fullstack-course/**
+
+Redeploy after any module change (the whole course is one file):
+
+```powershell
+aws s3 cp player/index.html s3://learnings.varasrinivas.com/fullstack-course/index.html --content-type "text/html; charset=utf-8" --cache-control "public, max-age=300"
+aws cloudfront create-invalidation --distribution-id ESC8HMAS41DRF --paths "/fullstack-course/*"
+```
+
 ## Lab prerequisites (students)
 
 Windows 11 + PowerShell 7, VS Code, Node 20+, Java 21, Docker (Desktop or Rancher).
