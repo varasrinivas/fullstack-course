@@ -1226,7 +1226,7 @@ unhandled error. Show me how to test all three cases.</pre>
   <section>
     <div class="recap">In the food court, <b>Anu taps once and Kiosk-7 does the walking</b> — a BFF turns many backend calls into one frontend-shaped answer.</div>
   </section>
-  <section class="next">Next track: enough stubs — we build the real kitchens. Spring Boot fires its first stove.</section>
+  <section class="next">Next: one more kiosk upgrade — Anu is tired of set meals. Custom order slips: GraphQL.</section>
   `,
   quiz:[
     {q:"A Backend-for-Frontend is…",
@@ -1238,6 +1238,165 @@ unhandled error. Show me how to test all three cases.</pre>
     {q:"The biggest win of the BFF for the frontend team is…",
      options:["Fewer npm packages","One request returning UI-shaped data instead of stitching N generic APIs in the browser","Free HTTPS","Faster CSS"],answer:1,
      why:"The receipt arrives pre-merged and pre-shaped; the counter just displays it."}
+  ]
+},
+{
+  id:"m19", track:"T2", trackName:"NestJS",
+  title:"Custom Order Slips (GraphQL)", minutes:25,
+  concepts:["GraphQL schema","queries & mutations","resolvers","over/under-fetching"],
+  analogyBeat:"Anu tires of set meals; Kiosk-7 rolls out custom slips",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 9½</div>
+    <p>Kiosk-7's screen offers <b>set meals</b>: tap Meal #3 and you get whatever Meal #3 contains — a mountain of rice Anu won't finish, a juice she didn't want, and <i>no raita</i>, which means queueing again for a second request.</p>
+    <p>Tonight the kiosk rolls out something new: a <b>custom order slip</b>. Anu writes exactly what she wants — biryani (just the name and price), one small lassi, and her order status — on one slip. The kiosk hands back a tray shaped exactly like the slip. Nothing extra, nothing missing, one trip.</p>
+    <p>Pinned beside the kiosk is a laminated poster listing every field a slip may ask for. Anu can request any shape — but only from that poster.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Set meals vs. custom slips</h2>
+    <p>REST endpoints are set meals: each URL returns one fixed shape. <b>GraphQL</b> is the custom slip — one endpoint, client-chosen shape:</p>
+    <table>
+      <tr><th>At the kiosk</th><th>In GraphQL</th></tr>
+      <tr><td>A fixed set meal</td><td>a REST endpoint — one URL, one predetermined response shape</td></tr>
+      <tr><td>Too much rice on the tray</td><td><b>over-fetching</b> — fields the UI never uses</td></tr>
+      <tr><td>Queueing twice for the raita</td><td><b>under-fetching</b> — one request wasn't enough</td></tr>
+      <tr><td>The custom order slip</td><td>a <b>query</b> (or a <b>mutation</b>, when it changes data)</td></tr>
+      <tr><td>The poster of allowed fields</td><td>the <b>schema</b> — a typed contract of everything askable</td></tr>
+      <tr><td>The clerk who fulfils one line of the slip</td><td>a <b>resolver</b> — a function per field/query</td></tr>
+    </table>
+    <p>Crucially: the back office doesn't change. GraphQL is another front desk over the same OrdersService — a new way to <i>ask</i>, not a new place to <i>keep</i> things.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 210" role="img" aria-label="One GraphQL query hits the schema, resolvers call the existing service, and the response matches the query shape">
+      <defs>
+        <marker id="a19S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx19{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb19{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm19{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp19{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a19S)}
+      </style>
+      <rect class="bx19" x="12" y="50" width="150" height="90" rx="8"/>
+      <text class="lb19" x="24" y="72">Anu's slip 📝</text>
+      <text class="sm19" x="24" y="92">{ orders {</text>
+      <text class="sm19" x="24" y="106">    item status</text>
+      <text class="sm19" x="24" y="120">} }</text>
+      <rect class="bx19" x="216" y="30" width="180" height="52" rx="8"/>
+      <text class="lb19" x="228" y="52">schema (the poster)</text>
+      <text class="sm19" x="228" y="68">is this shape allowed? ✓</text>
+      <rect class="bx19" x="216" y="110" width="180" height="52" rx="8"/>
+      <text class="lb19" x="228" y="132">resolvers (clerks)</text>
+      <text class="sm19" x="228" y="148">one per query/field</text>
+      <rect class="bx19" x="450" y="110" width="178" height="52" rx="8"/>
+      <text class="lb19" x="462" y="132">OrdersService</text>
+      <text class="sm19" x="462" y="148">the SAME back office (m08)</text>
+      <rect class="bx19" x="450" y="30" width="178" height="52" rx="8"/>
+      <text class="lb19" x="462" y="52">tray = slip shape</text>
+      <text class="sm19" x="462" y="68">only item + status return</text>
+      <path class="hp19" d="M164 80 C 190 80 190 56 214 56"/>
+      <path class="hp19" d="M306 84 V108"/>
+      <path class="hp19" d="M398 136 H448"/>
+      <path class="hp19" d="M539 108 V84"/>
+      <text class="sm19" x="180" y="46">POST /graphql</text>
+    </svg>
+    <figcaption><b>Food court:</b> the poster confirms Anu's slip only asks for allowed fields; clerks fetch each line from the same back office; the tray comes back slip-shaped.<br>
+    <b>Technical:</b> one POST /graphql is validated against the schema; resolvers delegate to the existing service; the response contains exactly the selected fields.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p>In <code>kiosk-7</code>, install the GraphQL desk (code-first — decorators build the poster for you):</p>
+      <pre>npm install @nestjs/graphql @nestjs/apollo @apollo/server graphql @as-integrations/express5</pre>
+      <p><i>The last package is Apollo's adapter for the Express 5 that current NestJS ships — without it the app boots but GraphQL refuses to mount.</i></p>
+      <p>The slip's vocabulary — <code>src/orders/order.type.ts</code>:</p>
+      <pre>import { Field, Int, ObjectType } from '@nestjs/graphql';
+
+@ObjectType()
+export class Order {
+  @Field(() => Int) id: number;
+  @Field() item: string;
+  @Field(() => Int) qty: number;
+  @Field() status: string;
+}</pre>
+      <p>The clerks — <code>src/orders/orders.resolver.ts</code> (note: it reuses OrdersService untouched):</p>
+      <pre>import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Order } from './order.type';
+import { OrdersService } from './orders.service';
+
+@Resolver(() => Order)
+export class OrdersResolver {
+  // "service", not "orders" — a field can't share a name with the query method
+  constructor(private readonly service: OrdersService) {}
+
+  @Query(() => [Order])
+  orders() { return this.service.findAll(); }
+
+  @Mutation(() => Order)
+  placeOrder(
+    @Args('item') item: string,
+    @Args('qty', { type: () => Int }) qty: number,
+  ) {
+    return this.service.create({ item, qty });
+  }
+}</pre>
+      <p>Switch the desk on: add <code>OrdersResolver</code> to OrdersModule's providers, and in AppModule's imports:</p>
+      <pre>GraphQLModule.forRoot&lt;ApolloDriverConfig&gt;({
+  driver: ApolloDriver,
+  autoSchemaFile: true,   // the poster, generated from your decorators
+}),</pre>
+      <p>Open <code>http://localhost:3000/graphql</code> — Apollo Sandbox. Write a slip, then an order:</p>
+      <pre>{ orders { item status } }
+
+mutation { placeOrder(item: "Mango Lassi", qty: 2) { id status } }</pre>
+      <div class="check">The query response contains ONLY item and status — no id, no qty. You chose the tray's shape.</div>
+      <div class="check">After the mutation, GET /orders (plain REST, m08) shows the lassi too — same tray, two front desks.</div>
+      <div class="check">Open the Sandbox's schema tab: the whole poster was generated from your decorators.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>My NestJS app kiosk-7 has an OrdersService with create({item, qty}) and
+findAll(), exposed via REST. Add a code-first GraphQL layer with
+@nestjs/graphql + Apollo: an Order object type, a query "orders", a
+query "order(id)" returning one order or null, and a mutation
+"placeOrder(item, qty)" — all delegating to the existing OrdersService
+(do not duplicate state). Keep the REST endpoints working. Then show me
+one query that demonstrates over-fetching is gone: fetch only each
+order's status.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Queries and the mutation work in Apollo Sandbox at /graphql; order(id) with an unknown id returns null, not an error.</div>
+      <div class="check">REST GET /orders still works and reflects GraphQL-placed orders (one shared service).</div>
+      <div class="check">The status-only query returns objects with exactly one field.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>the set meal never fit Anu's appetite — a custom slip returns exactly what she asked for</b>, and that is GraphQL.</div>
+  </section>
+  <section class="next">Next track: enough stubs — we build the real kitchens. Spring Boot fires its first stove.</section>
+  `,
+  quiz:[
+    {q:"The UI shows each order's name and status, but the REST endpoint also returns id, qty, timestamps and totals. That waste is called…",
+     options:["Under-fetching","Over-fetching","Caching","Pagination"],answer:1,
+     why:"Too much rice on the tray: fields shipped but never used. A GraphQL query selects only what the UI reads."},
+    {q:"The GraphQL schema is…",
+     options:["The database layout","A typed contract of every type and field a client may ask for","A list of REST routes","The Apollo Sandbox UI"],answer:1,
+     why:"The laminated poster by the kiosk: any slip shape is allowed, but only from the fields the poster declares."},
+    {q:"In this lab, what did GraphQL replace in kiosk-7?",
+     options:["The OrdersService and its array","Nothing in the back office — it added a second front desk over the same service","The REST controller (deleted)","The Kafka consumer"],answer:1,
+     why:"Resolvers delegate to the same OrdersService the REST controller uses. New way to ask; same place to keep."}
   ]
 },
 {
@@ -2300,6 +2459,7 @@ of what happens where.</pre>
       <tr><th>You need…</th><th>Reach for…</th></tr>
       <tr><td>Independent UI teams shipping on their own schedules</td><td>microfrontends (<b>single-spa</b>) — otherwise one Angular app is simpler and better</td></tr>
       <tr><td>One frontend-shaped API over many services</td><td>a BFF (<b>NestJS</b>)</td></tr>
+      <tr><td>Screens that each need differently-shaped data from that API</td><td><b>GraphQL</b> on the BFF (m19) — otherwise plain REST is simpler</td></tr>
       <tr><td>Business capabilities that scale and deploy separately, each owning its data</td><td>microservices (<b>Spring Boot</b>) — otherwise start with a well-organized monolith</td></tr>
       <tr><td>A long-running business flow people must see, audit, and change</td><td><b>Camunda</b> / BPMN</td></tr>
       <tr><td>Decoupled communication, replay, and surviving downtime</td><td><b>Kafka</b> events — otherwise plain HTTP is honest work</td></tr>

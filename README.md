@@ -3,9 +3,9 @@
 [![GitHub Repo](https://img.shields.io/badge/GitHub-varasrinivas%2Ffullstack--course-C4531F?logo=github&logoColor=white)](https://github.com/varasrinivas/fullstack-course)
 
 A Claude Code kit for building a beginner-friendly, analogy-driven course on
-**Angular · single-spa · NestJS · Spring Boot · Camunda · Kafka**.
+**Angular · single-spa · NestJS (REST + GraphQL) · Spring Boot · Camunda · Kafka**.
 
-18 modules · 7 tracks · ~7.5 hours · one continuous story.
+19 modules · 7 tracks · ~8 hours · one continuous story.
 
 ## What's inside
 
@@ -74,7 +74,7 @@ their first `mvnw` run. One extra download for Track 4: **Camunda 8 Run**
 |---|---|---|
 | T1 Angular (m03–m04) | `cd labs/t1-angular/biryani-counter` → `npm install` → `npm start` | http://localhost:4200 — add items on /menu, read them on /cart |
 | T1 single-spa (m06) | 3 terminals in `labs/t1-single-spa/`: `spice-root` → `npm start`; each counter → `npm run serve:single-spa:<name> -- --port 4201` (biryani) / `4202` (dosa) | http://localhost:9000/biryani ↔ /dosa swap without a page reload |
-| T2 NestJS (m07–m09) | `cd labs/t2-nestjs/kiosk-7` → `npm install` → `npm run start:dev`; stubs: `cd ../stubs` → `npx json-server db.json --port 3100` | http://localhost:3000/receipt — one receipt from two stubs |
+| T2 NestJS (m07–m09, m19) | `cd labs/t2-nestjs/kiosk-7` → `npm install` → `npm run start:dev`; stubs: `cd ../stubs` → `npx json-server db.json --port 3100` | http://localhost:3000/receipt — one receipt from two stubs; http://localhost:3000/graphql — Apollo Sandbox (m19) |
 | T3 Spring Boot (m10–m12) | `./mvnw spring-boot:run` in `biryani-kitchen` (:8080), or `order-service` (:8081) + `billing-service` (:8082) together | POST an order to :8081/orders → response carries `PAID-1` from :8082 |
 | T4 Camunda (m13–m14) | `.\c8run.exe start`, then in `labs/t4-camunda/steward-worker`: `npm install` → `node deploy-and-start.js 42` → `node worker.js` | Operate at http://localhost:8080 — watch instance #42 complete |
 | T5 Kafka (m15–m16) | `cd labs/t5-kafka` → `docker compose up -d` | console producer/consumer on topic `order.paid` (commands in m15) |

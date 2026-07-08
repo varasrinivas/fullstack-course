@@ -8,7 +8,7 @@ these are the answer key.
 |---|---|---|
 | `t1-angular/biryani-counter` | m03, m04 | Angular 20 app: menu + cart pages, shared `CartService`, routes |
 | `t1-single-spa/` | m06 | `spice-root` (root config, port 9000) + `biryani-counter` & `dosa-counter` (Angular MFEs via single-spa-angular) |
-| `t2-nestjs/kiosk-7` | m07–m09, m16, m17 | NestJS BFF: hello, orders (DTO + service), receipt fan-out, Kafka `RailConsumer`, and `ChecklistService` (m17 glue #1 — every order starts a Camunda instance) |
+| `t2-nestjs/kiosk-7` | m07–m09, m19, m16, m17 | NestJS BFF: hello, orders (DTO + service), receipt fan-out, GraphQL layer (m19: `order.type.ts` + `orders.resolver.ts` over the same OrdersService), Kafka `RailConsumer`, and `ChecklistService` (m17 glue #1) |
 | `t2-nestjs/stubs` | m09 | `db.json` for `npx json-server db.json --port 3100` |
 | `t3-spring/biryani-kitchen` | m10 | Hello World, `GET /hello`, port 8080 |
 | `t3-spring/kitchen-orders` | m11 | Controller → service → repository with JPA + H2, port 8080 |

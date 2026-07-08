@@ -1,4 +1,4 @@
-# Module Plan — 18 modules, 7 tracks, ~7.5 hours total
+# Module Plan — 19 modules, 7 tracks, ~8 hours total
 
 Crisp and short. Every track opens with a runnable Hello World.
 Labs assume Windows/PowerShell, Node 20+, Java 21, Docker Desktop.
@@ -15,10 +15,14 @@ Labs assume Windows/PowerShell, Node 20+, Java 21, Docker Desktop.
 | m05 | Why single-spa? | 20 | microfrontends, root config, registerApplication, activity functions | Farid decides which counters open on which floor tiles | No build — annotated walkthrough + diagram of root config |
 | m06 | Two Counters, One Floor | 35 | mount/unmount two Angular MFEs under a single-spa root | Dosa Counter joins the Biryani Counter on the same floor | create-single-spa: root config + 2 Angular apps, route between them |
 
-## T2 · NestJS (3 modules)
+## T2 · NestJS (4 modules)
 | m07 | NestJS Hello World | 20 | CLI, controller returns "Hello", decorators as "name badges" | Kiosk-7 is unboxed and switched on | `nest new` → GET /hello |
 | m08 | Controllers, Providers, Modules | 25 | request pipeline, DI, DTOs | Kiosk-7 learns the menu: take an order, validate it | POST /orders with a DTO + in-memory service |
 | m09 | The BFF Pattern | 25 | why a gateway, aggregation, one frontend-shaped API | Anu orders biryani + juice in ONE tap; Kiosk-7 fans out | Nest endpoint calls two stub JSON endpoints, merges the receipt |
+| m19* | Custom Order Slips (GraphQL) | 25 | schema, queries, mutations, resolvers, over/under-fetching | Anu tires of set meals; Kiosk-7 rolls out custom slips | @nestjs/graphql code-first over the existing OrdersService; query + mutation in Apollo Sandbox |
+
+*m19 was added after the original 18 shipped; ids stay stable, so it keeps the next
+free number but sits after m09 in the course flow (the player orders by story, not id).
 
 ## T3 · Spring Boot (3 modules)
 | m10 | Spring Boot Hello World | 20 | start.spring.io, @RestController, embedded server | The Biryani Kitchen fires its first stove | Generate project → GET /hello → run with Maven |
@@ -37,4 +41,4 @@ Labs assume Windows/PowerShell, Node 20+, Java 21, Docker Desktop.
 | m17 | Order #42, End to End | 45 | wire everything: MFE → BFF → Camunda → services → Kafka event → UI update | Anu taps Order; we follow the token through every hand | Guided assembly of the full flow from prior labs |
 | m18 | The Map on the Wall | 15 | recap mega-diagram, when to use what, where to go next | Anu leaves full and happy; Farid pins the floor map | Quiz-only + printable one-page architecture poster (SVG) |
 
-**Totals:** 18 modules · ~460 minutes · 6 technologies · 1 story.
+**Totals:** 19 modules · ~485 minutes · 6 technologies (+ GraphQL) · 1 story.

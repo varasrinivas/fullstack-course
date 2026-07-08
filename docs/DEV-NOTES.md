@@ -6,7 +6,10 @@ done, what was actually tested, and which decisions were deliberate.
 ## What was built
 
 - **m02–m18** authored into `player/index.html` following the m01 gold standard
-  (m01 shipped with the kit). All 18 modules pass `scripts/validate-module.ps1 -All`.
+  (m01 shipped with the kit). **m19 (GraphQL)** added later as a fourth T2 module —
+  ids stay stable, so it keeps the next free number but sits after m09 in the MODS
+  array (the player orders by story flow; nav groups by track either way). All 19
+  modules pass `scripts/validate-module.ps1 -All`.
 - **Player engine fix**: added a `hashchange` listener — back/forward buttons and
   manual `#mXX` URL edits now switch modules (they silently didn't before).
 - **`labs/`**: a completed reference solution for every lab track, each one
@@ -19,6 +22,7 @@ done, what was actually tested, and which decisions were deliberate.
 | m03/m04 Angular | browser-driven: /menu → add items → /cart shows them via shared CartService |
 | m06 single-spa | :9000/biryani ↔ /dosa mount/swap two real Angular MFEs, no reload, zero console errors |
 | m07–m09 NestJS | all endpoints pass incl. failure path (stubs down → clean 502) |
+| m19 GraphQL | mutation places order, field-selected query returns only item+status, order(99)→null, REST coexists, Sandbox serves |
 | m10–m12 Spring | cross-service call returns PAID-1; billing down → order saves as PENDING_PAYMENT |
 | m14 Camunda | deployed to Camunda 8 Run 8.8, worker completed the job, instance state COMPLETED via API |
 | m15/m16 Kafka | console produce/consume/replay; then Spring producer → NestJS kafkajs consumer flipped an order status |
@@ -53,6 +57,12 @@ done, what was actually tested, and which decisions were deliberate.
    ~2 GB free where it runs. Lab text says 4+ GB to be safe.
 4. **kafkajs consumers connect once at startup** — start Kafka before the kiosk,
    or restart the kiosk (m16/m17 lab text notes this).
+5. **@nestjs/apollo on NestJS 11 needs `@as-integrations/express5`** (NestJS 11
+   ships Express 5): without it the app boots but GraphQL never mounts. The m19
+   install line includes it.
+6. **GraphQL resolver naming**: a constructor property can't share a name with a
+   query method (`orders` vs `orders()` is a TS duplicate-identifier error) —
+   the reference injects the service as `service`.
 
 ## Environment notes (authoring machine)
 
