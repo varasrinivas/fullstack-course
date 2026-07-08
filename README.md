@@ -1,5 +1,7 @@
 # The Spice Route Food Court — Course Authoring Kit
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-varasrinivas%2Ffullstack--course-C4531F?logo=github&logoColor=white)](https://github.com/varasrinivas/fullstack-course)
+
 A Claude Code kit for building a beginner-friendly, analogy-driven course on
 **Angular · single-spa · NestJS · Spring Boot · Camunda · Kafka**.
 
