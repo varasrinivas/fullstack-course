@@ -1,0 +1,7 @@
+# m15 - The Ticket Rail. One prefab unit: a single-broker Kafka in KRaft mode.
+services:
+  rail:
+    image: apache/kafka:3.9.0
+    container_name: rail
+    ports:
+      - "9092:9092"

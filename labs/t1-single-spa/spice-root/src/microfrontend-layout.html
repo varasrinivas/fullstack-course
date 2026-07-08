@@ -1,0 +1,16 @@
+<single-spa-router>
+  <main>
+    <route default>
+      <h1 style="font-family: sans-serif; text-align: center; margin-top: 3rem;">
+        🍛 The Spice Route — pick a counter:
+        <a href="/biryani">Biryani</a> · <a href="/dosa">Dosa</a>
+      </h1>
+    </route>
+    <route path="biryani">
+      <application name="biryani-counter"></application>
+    </route>
+    <route path="dosa">
+      <application name="dosa-counter"></application>
+    </route>
+  </main>
+</single-spa-router>

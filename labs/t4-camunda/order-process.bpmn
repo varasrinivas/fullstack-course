@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- m13/m14 reference: Meenakshi's laminated checklist, executable on Camunda 8.
+     "Take payment" and "Quality check" are undefined tasks (pass-through in Zeebe)
+     so the reference runs end-to-end with only the notify-kitchen worker.
+     Gateway: the "no" flow fires only when paid = false; "yes" is the default. -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="Definitions_order" targetNamespace="http://spiceroute.example">
+  <bpmn:process id="order-fulfilment" name="Order fulfilment" isExecutable="true">
+    <bpmn:startEvent id="start" name="Order received">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="take-payment" name="Take payment">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="gw-paid" name="Payment OK?" default="f-yes">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f-yes</bpmn:outgoing>
+      <bpmn:outgoing>f-no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="notify-kitchen-task" name="Notify kitchen">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notify-kitchen"/>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f-yes</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="quality-check" name="Quality check">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end-fulfilled" name="Order fulfilled">
+      <bpmn:incoming>f4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="cancel-order" name="Cancel order">
+      <bpmn:incoming>f-no</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="end-cancelled" name="Order cancelled">
+      <bpmn:incoming>f5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="take-payment"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="take-payment" targetRef="gw-paid"/>
+    <bpmn:sequenceFlow id="f-yes" name="yes" sourceRef="gw-paid" targetRef="notify-kitchen-task"/>
+    <bpmn:sequenceFlow id="f-no" name="no" sourceRef="gw-paid" targetRef="cancel-order">
+      <bpmn:conditionExpression>=paid = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="f3" sourceRef="notify-kitchen-task" targetRef="quality-check"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="quality-check" targetRef="end-fulfilled"/>
+    <bpmn:sequenceFlow id="f5" sourceRef="cancel-order" targetRef="end-cancelled"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_order">
+    <bpmndi:BPMNPlane id="Plane_order" bpmnElement="order-fulfilment">
+      <bpmndi:BPMNShape id="s_start" bpmnElement="start">
+        <dc:Bounds x="152" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_take" bpmnElement="take-payment">
+        <dc:Bounds x="240" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_gw" bpmnElement="gw-paid" isMarkerVisible="true">
+        <dc:Bounds x="395" y="95" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_notify" bpmnElement="notify-kitchen-task">
+        <dc:Bounds x="500" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_qc" bpmnElement="quality-check">
+        <dc:Bounds x="660" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_endf" bpmnElement="end-fulfilled">
+        <dc:Bounds x="812" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_cancel" bpmnElement="cancel-order">
+        <dc:Bounds x="500" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_endc" bpmnElement="end-cancelled">
+        <dc:Bounds x="812" y="242" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="e_f1" bpmnElement="f1">
+        <di:waypoint x="188" y="120"/><di:waypoint x="240" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_f2" bpmnElement="f2">
+        <di:waypoint x="340" y="120"/><di:waypoint x="395" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_fyes" bpmnElement="f-yes">
+        <di:waypoint x="445" y="120"/><di:waypoint x="500" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_fno" bpmnElement="f-no">
+        <di:waypoint x="420" y="145"/><di:waypoint x="420" y="260"/><di:waypoint x="500" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_f3" bpmnElement="f3">
+        <di:waypoint x="600" y="120"/><di:waypoint x="660" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_f4" bpmnElement="f4">
+        <di:waypoint x="760" y="120"/><di:waypoint x="812" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="e_f5" bpmnElement="f5">
+        <di:waypoint x="600" y="260"/><di:waypoint x="812" y="260"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

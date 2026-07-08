@@ -1,0 +1,4 @@
+{
+  "kitchen": { "orderId": 42, "item": "Hyderabadi Biryani", "status": "COOKING" },
+  "billing": { "orderId": 42, "total": 180, "paid": true }
+}

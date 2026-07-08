@@ -1,0 +1,11 @@
+{
+  "name": "steward-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node worker.js"
+  },
+  "dependencies": {
+    "@camunda8/sdk": "^8.6.0"
+  }
+}

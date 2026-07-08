@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Spice Route Food Court — Full-Stack Microservices Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1714; --paper:#FBF7F0; --stall:#C4531F; --steam:#2E6E63;
+  --rail:#E8DFD2; --night:#241E38;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:"Fraunces",serif;font-optical-sizing:auto;line-height:1.2;margin:0 0 .5em}
+code,pre,.mono{font-family:"JetBrains Mono",monospace}
+pre{background:var(--night);color:#EFE9DC;padding:16px;border-radius:8px;
+  overflow-x:auto;font-size:13.5px;line-height:1.55}
+code{background:var(--rail);padding:1px 5px;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+
+/* Layout */
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+nav{border-right:1.5px solid var(--rail);padding:20px 14px;position:sticky;top:0;
+  height:100vh;overflow-y:auto;background:var(--paper)}
+nav .brand{font-family:"Fraunces",serif;font-weight:700;font-size:18px;margin-bottom:16px}
+nav .track{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--stall);margin:14px 0 4px}
+nav a{display:block;padding:5px 8px;border-radius:6px;color:var(--ink);
+  text-decoration:none;font-size:13.5px}
+nav a:hover{background:var(--rail)}
+nav a.active{background:var(--ink);color:var(--paper)}
+main{padding:32px 24px 96px;max-width:760px;margin:0 auto;width:100%}
+#menuBtn{display:none}
+
+/* Signature: order-ticket module header */
+.ticket{background:#fff;border:1.5px solid var(--ink);border-radius:0 0 10px 10px;
+  padding:18px 22px 16px;margin-bottom:28px;position:relative;
+  box-shadow:4px 4px 0 var(--rail)}
+.ticket::before{content:"";position:absolute;top:-1px;left:0;right:0;height:10px;
+  background:radial-gradient(circle at 10px 0,transparent 6px,#fff 6.5px) repeat-x;
+  background-size:20px 10px;
+  border-top:0}
+.ticket .row{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--stall)}
+.ticket h1{font-size:30px;margin:.25em 0 .1em}
+.ticket .meta{font-size:13px;color:#6b625a}
+.ticket .concepts span{display:inline-block;background:var(--rail);border-radius:99px;
+  padding:2px 10px;font-size:12px;margin:6px 6px 0 0;font-family:"JetBrains Mono",monospace}
+
+/* Sections */
+section{margin:34px 0}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--steam);margin-bottom:8px}
+.analogy{border-left:3px solid var(--stall);padding:4px 0 4px 18px}
+.analogy p{margin:.6em 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:12px 0}
+th,td{border:1px solid var(--rail);padding:8px 12px;text-align:left}
+th{background:var(--rail);font-family:"JetBrains Mono",monospace;font-size:12px;
+  text-transform:uppercase;letter-spacing:.06em}
+.diagram{background:#fff;border:1.5px solid var(--rail);border-radius:10px;padding:20px}
+.diagram figcaption{font-size:13.5px;color:#6b625a;margin-top:12px}
+.diagram figcaption b{color:var(--steam)}
+
+/* Labs */
+.lab{background:#fff;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden}
+.lab .tabs{display:flex;border-bottom:1.5px solid var(--ink)}
+.lab .tabs button{flex:1;padding:12px;border:0;background:var(--rail);cursor:pointer;
+  font:600 13px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.05em}
+.lab .tabs button.on{background:#fff}
+.lab .pane{display:none;padding:20px}
+.lab .pane.on{display:block}
+.check{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:14.5px}
+.check::before{content:"☐";color:var(--steam);font-size:18px;line-height:1.3}
+
+/* Quiz */
+.quiz .q{background:#fff;border:1.5px solid var(--rail);border-radius:10px;
+  padding:16px 18px;margin:12px 0}
+.quiz .opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;
+  border:1.5px solid var(--rail);border-radius:8px;background:var(--paper);
+  cursor:pointer;font:14.5px system-ui}
+.quiz .opt.right{border-color:var(--steam);background:#E8F2EF}
+.quiz .opt.wrong{border-color:var(--stall);background:#F9E9E1}
+.quiz .why{display:none;font-size:13.5px;color:var(--steam);margin-top:8px}
+.quiz .q.done .why{display:block}
+
+.recap{background:var(--night);color:#EFE9DC;border-radius:10px;padding:16px 20px;
+  font-family:"Fraunces",serif;font-size:17px}
+.recap b{color:#F0A97D}
+.next{font-size:14px;color:#6b625a;font-style:italic}
+.navBtns{display:flex;justify-content:space-between;margin-top:44px}
+.navBtns button{padding:10px 18px;border:1.5px solid var(--ink);border-radius:8px;
+  background:#fff;cursor:pointer;font:600 13px "JetBrains Mono",monospace}
+.navBtns button:hover{background:var(--rail)}
+
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  nav{position:fixed;left:-260px;width:250px;transition:left .25s;z-index:20;
+    border-right:1.5px solid var(--ink)}
+  nav.open{left:0}
+  #menuBtn{display:block;position:fixed;top:12px;right:12px;z-index:21;
+    padding:8px 14px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;
+    font:600 12px "JetBrains Mono",monospace;cursor:pointer}
+  main{padding:56px 18px 80px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}nav{transition:none}}
+</style>
+</head>
+<body>
+<button id="menuBtn" aria-label="Toggle module menu">MENU</button>
+<div class="app">
+<nav id="nav" aria-label="Modules"><div class="brand">🍛 The Spice Route</div><div id="navList"></div></nav>
+<main id="main"></main>
+</div>
+
+<script>
+/* ==========================================================================
+   MODS — one object per module. m01 is the GOLD-STANDARD reference module.
+   Claude Code: follow its structure exactly for m02..m18 (see CLAUDE.md).
+   ========================================================================== */
+const MODS = [
+{
+  id:"m01", track:"T0", trackName:"Foundations",
+  title:"Welcome to the Food Court", minutes:15,
+  concepts:["monolith vs microservices","microfrontends","orchestration","events"],
+  analogyBeat:"Anu's first visit; Farid walks her across the floor",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 1</div>
+    <p>Anu steps into <b>The Spice Route</b> food court on a Friday evening. Years ago this was one giant restaurant — one kitchen, one menu, one queue. When the tandoor broke, <i>everything</i> stopped.</p>
+    <p>Today it's different. Farid, the floor manager, walks her past independent stalls: a Biryani Counter, a Dosa Counter, a Juice Counter. Behind them, separate kitchens with their own stoves and pantries. A steward named Meenakshi moves between them holding a laminated checklist, and above the pass, order tickets slide along a steel rail.</p>
+    <p>"One stall can close, renovate, or catch fire," Farid says, "and the food court keeps serving."</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>One giant restaurant vs. a food court</h2>
+    <p>The old single restaurant is a <b>monolith</b>: one codebase, one deployment, one point of failure. The food court is the modern architecture you'll build in this course:</p>
+    <table>
+      <tr><th>In the food court</th><th>In your application</th></tr>
+      <tr><td>Stall counters Anu sees</td><td><b>Angular</b> microfrontends (UI pieces)</td></tr>
+      <tr><td>Farid, the floor manager</td><td><b>single-spa</b> — decides which UI loads where</td></tr>
+      <tr><td>Kiosk-7, the one ordering kiosk</td><td><b>NestJS</b> — a Backend-for-Frontend (BFF)</td></tr>
+      <tr><td>Independent kitchens & pantries</td><td><b>Spring Boot</b> microservices, each with its own database</td></tr>
+      <tr><td>Meenakshi's laminated checklist</td><td><b>Camunda</b> — a drawn, executable workflow (BPMN)</td></tr>
+      <tr><td>The ticket rail</td><td><b>Kafka</b> — services publish and subscribe to events</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 330" role="img" aria-label="Food court architecture: browser to microfrontends to BFF to Camunda and Spring services connected by Kafka">
+      <defs>
+        <marker id="aS" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="aG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5;rx:8}
+        .lb{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#aS)}
+        .ev{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#aG)}
+      </style>
+      <rect class="bx" x="20" y="20" width="120" height="44" rx="8"/>
+      <text class="lb" x="35" y="40">Anu 👤</text><text class="sm" x="35" y="55">browser</text>
+      <rect class="bx" x="200" y="10" width="180" height="64" rx="8"/>
+      <text class="lb" x="212" y="30">Farid (single-spa)</text>
+      <text class="sm" x="212" y="46">Biryani MFE · Dosa MFE</text>
+      <text class="sm" x="212" y="60">(Angular)</text>
+      <rect class="bx" x="440" y="20" width="170" height="44" rx="8"/>
+      <text class="lb" x="452" y="40">Kiosk-7 (NestJS)</text><text class="sm" x="452" y="55">BFF / gateway</text>
+      <rect class="bx" x="440" y="110" width="170" height="44" rx="8"/>
+      <text class="lb" x="452" y="130">Meenakshi</text><text class="sm" x="452" y="145">(Camunda · BPMN)</text>
+      <rect class="bx" x="200" y="110" width="180" height="44" rx="8"/>
+      <text class="lb" x="212" y="130">Biryani Kitchen</text><text class="sm" x="212" y="145">(Spring Boot + DB)</text>
+      <rect class="bx" x="20" y="110" width="140" height="44" rx="8"/>
+      <text class="lb" x="32" y="130">Billing Room</text><text class="sm" x="32" y="145">(Spring Boot + DB)</text>
+      <rect class="bx" x="20" y="230" width="590" height="46" rx="8"/>
+      <text class="lb" x="240" y="250">The Ticket Rail (Kafka)</text>
+      <text class="sm" x="200" y="266">topic: order.paid · topic: order.ready</text>
+      <path class="hp" d="M140 42 H198"/>
+      <path class="hp" d="M380 42 H438"/>
+      <path class="hp" d="M525 64 V108"/>
+      <path class="hp" d="M438 132 H382"/>
+      <path class="ev" d="M90 154 V228"/>
+      <path class="ev" d="M290 228 V156"/>
+      <text class="sm" x="98" y="195">publish</text>
+      <text class="sm" x="298" y="195">consume</text>
+    </svg>
+    <figcaption><b>Food court:</b> Anu orders at a counter; Farid decides which counter she sees; Kiosk-7 hands the order to Meenakshi, who calls kitchens by her checklist; Billing pins "PAID" on the rail and the Biryani Kitchen grabs it.<br>
+    <b>Technical:</b> the browser loads Angular MFEs via single-spa; the NestJS BFF starts a Camunda process instance; the process calls Spring Boot services; services communicate asynchronously through Kafka topics.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>No code yet.</b> Your only job: read the diagram out loud, twice.</p>
+      <div class="check">First pass, tell the <i>story</i>: "Anu orders… Farid shows… Kiosk-7 forwards… Meenakshi checks… Billing pins a ticket… the Kitchen grabs it."</div>
+      <div class="check">Second pass, use only <i>tech terms</i>: "The browser… single-spa… the NestJS BFF… a Camunda process… a Kafka producer… a Kafka consumer."</div>
+      <div class="check">Point at the two arrow styles. Solid orange = a request that <b>waits</b> for an answer (HTTP). Dashed green = a ticket <b>pinned and walked away from</b> (event).</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>Explain the difference between synchronous HTTP calls and
+asynchronous Kafka events using a food-court analogy where
+tickets are pinned on a rail. Then give me one real-world
+failure that HTTP-everywhere causes and events fix.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The answer distinguishes "waiting on the phone" vs "pin and move on".</div>
+      <div class="check">It names at least one concrete failure (e.g., cascading timeouts).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>no single stove failure closes the building</b> — that is the whole reason microservices, microfrontends, workflows, and events exist.</div>
+  </section>
+  <section class="next">Next: we set up your toolbelt and say hello to Node, Java, and Docker — the food court opens its doors.</section>
+  `,
+  quiz:[
+    {q:"The old single restaurant — one kitchen, one menu, one queue — maps to which architecture?",
+     options:["Microservices","A monolith","A BFF","Event streaming"],answer:1,
+     why:"One codebase, one deployment, one point of failure = monolith."},
+    {q:"Farid never cooks; he only decides which counters appear on the floor. Farid is…",
+     options:["Spring Boot","Kafka","single-spa","Camunda"],answer:2,
+     why:"single-spa is the root config that mounts/unmounts microfrontends — pure coordination, no business logic."},
+    {q:"A ticket pinned on the rail that kitchens read when ready — and that stays on the rail afterwards — is…",
+     options:["An HTTP request","A Kafka event on a topic","A BPMN gateway","An Angular route"],answer:1,
+     why:"Kafka events are published to topics, consumed independently, and retained after being read."}
+  ]
+}
+,
+{
+  id:"m02", track:"T0", trackName:"Foundations",
+  title:"Your Toolbelt, Hello Everything", minutes:20,
+  concepts:["Node.js","Java 21","Docker","dev environment"],
+  analogyBeat:"Opening day — Farid checks power, gas, and the prefab units",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 2</div>
+    <p>It is 6 a.m. on opening day. Before a single stall lifts its shutter, Farid walks the floor with a clipboard and checks the utilities: <b>electricity</b> for the counters and their screens, the <b>gas line</b> for the kitchens, and the <b>prefab units</b> — ready-made stall modules the mall can wheel in, plug in, and wheel out again.</p>
+    <p>No utility, no food court. He flips each switch once and watches for the light before anyone cooks anything.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Three utilities power everything you will build</h2>
+    <table>
+      <tr><th>In the food court</th><th>On your machine</th></tr>
+      <tr><td>Electricity for counters &amp; the kiosk</td><td><b>Node.js 20+</b> — runs Angular tooling and NestJS</td></tr>
+      <tr><td>The gas line for the kitchens</td><td><b>Java 21</b> — runs the Spring Boot services</td></tr>
+      <tr><td>Prefab units wheeled in ready-made</td><td><b>Docker Desktop</b> — runs Kafka and Camunda as containers</td></tr>
+      <tr><td>Farid's opening-day checklist</td><td>the version checks below — verify once, use for the whole course</td></tr>
+    </table>
+    <p>Every lab from m03 onward assumes these three hum quietly in the background. Check them now; never think about them again.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 220" role="img" aria-label="Node, Java and Docker feeding the dev machine like utilities feeding the food court">
+      <defs><marker id="a2S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker></defs>
+      <style>
+        .bx2{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb2{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm2{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp2{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a2S)}
+      </style>
+      <rect class="bx2" x="20" y="20" width="180" height="60" rx="8"/>
+      <text class="lb2" x="34" y="44">Node.js ⚡ v20+</text><text class="sm2" x="34" y="62">counters &amp; kiosk (JS/TS)</text>
+      <rect class="bx2" x="230" y="20" width="180" height="60" rx="8"/>
+      <text class="lb2" x="244" y="44">Java 21 🔥</text><text class="sm2" x="244" y="62">kitchens (Spring Boot)</text>
+      <rect class="bx2" x="440" y="20" width="180" height="60" rx="8"/>
+      <text class="lb2" x="454" y="44">Docker 📦</text><text class="sm2" x="454" y="62">prefab units (Kafka, Camunda)</text>
+      <rect class="bx2" x="20" y="150" width="600" height="50" rx="8"/>
+      <text class="lb2" x="180" y="172">The Spice Route — your dev machine</text>
+      <text class="sm2" x="180" y="188">Windows 11 · PowerShell 7 · VS Code · localhost only</text>
+      <path class="hp2" d="M110 80 V148"/><path class="hp2" d="M320 80 V148"/><path class="hp2" d="M530 80 V148"/>
+    </svg>
+    <figcaption><b>Food court:</b> before opening day, Farid confirms the power, the gas line, and the prefab units all work — no utility, no service.<br>
+    <b>Technical:</b> Node.js powers the frontend and BFF tooling, Java 21 powers the microservices, Docker runs infrastructure (Kafka, Camunda) as containers — all on localhost.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Flip each switch once.</b> Open PowerShell 7 and run:</p>
+      <pre>node -v          # want v20 or higher
+npm -v           # any recent version
+java -version    # want 21
+docker run hello-world</pre>
+      <p>Now serve your very first page — the food court's "OPEN" sign:</p>
+      <pre>mkdir hello-court
+cd hello-court
+Set-Content index.html "&lt;h1&gt;🍛 The Spice Route is open&lt;/h1&gt;"
+npx serve .</pre>
+      <div class="check">All four commands print a version or a success message (Docker says "Hello from Docker!").</div>
+      <div class="check">Your browser shows the OPEN sign at the URL npx serve prints (usually http://localhost:3000).</div>
+      <div class="check">Stop the server with Ctrl+C — you will do this a hundred times in this course.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>Write a PowerShell 7 script named verify-toolbelt.ps1 that checks my
+machine for: Node.js 20 or higher, npm, Java 21, and a running Docker
+Desktop (test it by running the hello-world image). For each tool print
+PASS or FAIL plus the version found, and exit with code 1 if anything
+fails. Then tell me exactly how to run the script.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The script prints one PASS/FAIL line per tool, with the detected version.</div>
+      <div class="check">It exits with code 1 when a tool is missing or too old.</div>
+      <div class="check">You ran it and got four PASS lines.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>nothing opens until power, gas, and the prefab units all hum</b> — Node, Java, and Docker are those utilities for every lab ahead.</div>
+  </section>
+  <section class="next">Next: the Biryani Counter bolts on its first menu board — your first Angular app, running in under ten minutes.</section>
+  `,
+  quiz:[
+    {q:"Angular tooling and NestJS both run on which utility?",
+     options:["Java 21","Node.js","Docker","Kafka"],answer:1,
+     why:"Both the counters (Angular) and Kiosk-7 (NestJS) are JavaScript/TypeScript — they run on Node.js."},
+    {q:"Running docker run hello-world proves that…",
+     options:["Docker can compile Java","your machine can pull and run container images","Kafka is installed","Node is version 20+"],answer:1,
+     why:"It pulls a tiny image and runs it — exactly what you will later do with Kafka and Camunda, the prefab units."},
+    {q:"Why verify all versions now instead of when each track starts?",
+     options:["The tools expire otherwise","Later labs assume Node 20+ and Java 21 — failing fast beats debugging mid-lab","Docker requires it","npm refuses to run unverified"],answer:1,
+     why:"Farid checks utilities before opening, not during the lunch rush. Version surprises mid-lab are the #1 beginner time sink."}
+  ]
+},
+{
+  id:"m03", track:"T1", trackName:"Angular + single-spa",
+  title:"Angular Hello World", minutes:25,
+  concepts:["Angular CLI","components","dev server","hot reload"],
+  analogyBeat:"The Biryani Counter gets its first menu board",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 3</div>
+    <p>The Biryani Counter crew arrives to bare plywood. Their first fixture is the <b>menu board</b> — and it is chalk on slate, not printed plastic. Rewrite a price and every customer in the queue sees the change instantly.</p>
+    <p>Look closely: the board has three layers. The chalk writing Anu reads, the price arithmetic scribbled on its back, and the paintwork that makes it look like <i>this</i> stall's board and nobody else's.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Each stall builds its own counter</h2>
+    <p>"Each stall builds its own counter: menu board, buttons, screens. The counter is everything Anu sees and touches at that stall." That counter is an <b>Angular</b> app, and the menu board is your first <b>component</b>:</p>
+    <table>
+      <tr><th>The menu board</th><th>An Angular component</th></tr>
+      <tr><td>The chalk writing Anu reads</td><td>the <b>template</b> (HTML)</td></tr>
+      <tr><td>The arithmetic on the back</td><td>the <b>class</b> (TypeScript — data and logic)</td></tr>
+      <tr><td>The paintwork</td><td>the <b>styles</b> (CSS, scoped to this component)</td></tr>
+      <tr><td>The crew's toolkit van</td><td>the <b>Angular CLI</b> (creates, serves, builds)</td></tr>
+      <tr><td>Rewriting chalk, queue sees it instantly</td><td>the <b>dev server</b> with hot reload</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Angular dev server serving a component made of template, class and styles to the browser">
+      <defs>
+        <marker id="a3S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a3G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx3{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb3{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm3{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp3{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a3S)}
+        .ev3{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a3G)}
+      </style>
+      <rect x="20" y="20" width="300" height="190" rx="10" fill="none" stroke="#2E6E63" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text class="sm3" x="34" y="42">App component = the menu board</text>
+      <rect class="bx3" x="40" y="56" width="260" height="38" rx="8"/>
+      <text class="lb3" x="54" y="80">template (.html) — the chalk</text>
+      <rect class="bx3" x="40" y="104" width="260" height="38" rx="8"/>
+      <text class="lb3" x="54" y="128">class (.ts) — the arithmetic</text>
+      <rect class="bx3" x="40" y="152" width="260" height="38" rx="8"/>
+      <text class="lb3" x="54" y="176">styles (.css) — the paintwork</text>
+      <rect class="bx3" x="420" y="40" width="190" height="50" rx="8"/>
+      <text class="lb3" x="434" y="62">dev server</text><text class="sm3" x="434" y="78">npm start · :4200</text>
+      <rect class="bx3" x="420" y="150" width="190" height="50" rx="8"/>
+      <text class="lb3" x="434" y="172">Anu's browser 👤</text><text class="sm3" x="434" y="188">localhost:4200</text>
+      <path class="ev3" d="M322 90 C 370 90 380 65 418 65"/>
+      <text class="sm3" x="330" y="58">save → rebuild</text>
+      <path class="hp3" d="M515 92 V148"/>
+      <text class="sm3" x="524" y="124">hot reload</text>
+    </svg>
+    <figcaption><b>Food court:</b> the crew rewrites the chalk; the queue sees the new price the same second.<br>
+    <b>Technical:</b> the dev server watches your component files, rebuilds on save, and pushes the update to the browser without a manual refresh.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Ten minutes to a live board.</b> From a clean folder (the CLI version is pinned so these steps keep working — newer majors may demand a newer Node than your toolbelt has):</p>
+      <pre>npx @angular/cli@20 new biryani-counter --defaults
+cd biryani-counter
+npm start</pre>
+      <p>Open <code>http://localhost:4200</code> — Angular's placeholder page is up. Now claim it. In <code>src/app/</code>, open the root component's template — <code>app.html</code> (older CLI versions name it <code>app.component.html</code>) — delete everything, and write your board:</p>
+      <pre>&lt;h1&gt;🍛 Biryani Counter&lt;/h1&gt;
+&lt;p&gt;Hyderabadi Biryani — ₹180&lt;/p&gt;
+&lt;p&gt;Egg Biryani — ₹140&lt;/p&gt;</pre>
+      <div class="check">The moment you save, the browser shows your menu — you did not press refresh. That is hot reload.</div>
+      <div class="check">Change ₹180 to ₹190 and save. Watch the queue (browser) see it instantly.</div>
+      <div class="check">Find the three layers on disk: the template you edited, the class (<code>app.ts</code> / <code>app.component.ts</code>), and the styles file next to them.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I am on Windows with PowerShell and Node 20. Using npx @angular/cli@20,
+create a new Angular app named biryani-counter. Replace the root
+component's template with a menu board: an h1 saying "Biryani Counter"
+and three biryani items with prices in rupees. Add a component style
+that colors the h1 with #C4531F. Give me the exact commands you ran and
+list every file you changed and why.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The app serves at localhost:4200 and shows a three-item menu.</div>
+      <div class="check">The h1 renders in tandoor orange (#C4531F) via the component's own style file.</div>
+      <div class="check">Editing a price hot-reloads in the browser without a refresh.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>the menu board is chalk, not print</b> — change it and the queue sees it instantly, which is exactly what the Angular dev server does with your template.</div>
+  </section>
+  <section class="next">Next: the counter grows a cart page, and the staff learn to ask the manager for shared tools — services, dependency injection, and routes.</section>
+  `,
+  quiz:[
+    {q:"An Angular component is…",
+     options:["A CSS framework","A template, a class, and styles working as one UI piece","A database table","The Angular CLI itself"],answer:1,
+     why:"The menu board: chalk (template) + arithmetic (class) + paintwork (styles) = one component."},
+    {q:"What does npm start (ng serve) give you?",
+     options:["A production build","A dev server that rebuilds and hot-reloads on every save","A Docker container","A unit test runner"],answer:1,
+     why:"It watches your files and pushes changes to the browser — rewrite the chalk, the queue sees it."},
+    {q:"Anu reads 'Hyderabadi Biryani — ₹180' on screen. Which layer does that text live in?",
+     options:["The template","The class","The styles","The CLI"],answer:0,
+     why:"The template is the chalk writing — everything Anu reads and sees is markup in the template."}
+  ]
+},
+{
+  id:"m04", track:"T1", trackName:"Angular + single-spa",
+  title:"Components, Services & Routing", minutes:30,
+  concepts:["services","dependency injection","routing","component communication"],
+  analogyBeat:"The counter gets a menu page and a cart page sharing one clipboard",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 4</div>
+    <p>The Biryani Counter now has two zones: the <b>menu wall</b> where Anu browses, and the <b>pickup tray</b> where her chosen items pile up. Different staff run each zone.</p>
+    <p>Here is the house rule: staff never keep private tallies. When the menu-wall staff add an item, they ask the manager for <i>the</i> one shared cart clipboard and write on it. The tray staff read the very same clipboard. One clipboard, no arguments.</p>
+    <p>Floor signage does the rest: "Menu this way → · Cart that way →". Anu follows signs; the right zone appears.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Shared tools and floor signage</h2>
+    <table>
+      <tr><th>At the counter</th><th>In Angular</th></tr>
+      <tr><td>Menu wall &amp; pickup tray zones</td><td>two <b>components</b> (Menu, Cart)</td></tr>
+      <tr><td>The one shared cart clipboard</td><td>a <b>service</b> (CartService)</td></tr>
+      <tr><td>Asking the manager instead of buying your own</td><td><b>dependency injection</b> — you declare what you need; Angular hands you the shared instance</td></tr>
+      <tr><td>Floor signage "Menu → · Cart →"</td><td>the <b>Router</b> — routes map a URL to a component</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 250" role="img" aria-label="Router directing URLs to Menu or Cart components, both injected with one CartService">
+      <defs>
+        <marker id="a4S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a4G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx4{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb4{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm4{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp4{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a4S)}
+        .ev4{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a4G)}
+      </style>
+      <rect class="bx4" x="20" y="20" width="170" height="60" rx="8"/>
+      <text class="lb4" x="34" y="44">Router (signage)</text>
+      <text class="sm4" x="34" y="62">/menu · /cart</text>
+      <rect class="bx4" x="250" y="10" width="170" height="44" rx="8"/>
+      <text class="lb4" x="264" y="30">Menu component</text><text class="sm4" x="264" y="45">the menu wall</text>
+      <rect class="bx4" x="250" y="76" width="170" height="44" rx="8"/>
+      <text class="lb4" x="264" y="96">Cart component</text><text class="sm4" x="264" y="111">the pickup tray</text>
+      <rect class="bx4" x="250" y="180" width="170" height="50" rx="8"/>
+      <text class="lb4" x="264" y="202">CartService</text><text class="sm4" x="264" y="218">the ONE clipboard</text>
+      <path class="hp4" d="M192 40 C 220 40 220 32 248 32"/>
+      <path class="hp4" d="M192 60 C 220 60 220 98 248 98"/>
+      <path class="ev4" d="M320 56 V74"/>
+      <path class="ev4" d="M335 122 V178"/>
+      <text class="sm4" x="345" y="152">both inject the same instance</text>
+      <text class="sm4" x="26" y="100">URL decides which</text>
+      <text class="sm4" x="26" y="114">component mounts</text>
+    </svg>
+    <figcaption><b>Food court:</b> signage sends Anu to the menu wall or the tray; both zones write on and read from the one clipboard the manager holds.<br>
+    <b>Technical:</b> the Router mounts Menu or Cart by URL; both components inject the same root-provided CartService instance, so state is shared for free.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p>Inside your <code>biryani-counter</code> app from m03, generate the pieces:</p>
+      <pre>npx ng generate component menu
+npx ng generate component cart
+npx ng generate service cart</pre>
+      <p>The clipboard — <code>src/app/cart.service.ts</code>:</p>
+      <pre>import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })   // ONE shared instance, app-wide
+export class CartService {
+  items: string[] = [];
+  add(item: string) { this.items.push(item); }
+}</pre>
+      <p>The menu wall asks the manager for it — <code>menu.ts</code> class and template:</p>
+      <pre>import { Component, inject } from '@angular/core';
+// in the class body:
+cart = inject(CartService);           // "manager, the clipboard please"</pre>
+      <pre>&lt;h2&gt;Menu&lt;/h2&gt;
+&lt;button (click)="cart.add('Hyderabadi Biryani')"&gt;Add Biryani — ₹180&lt;/button&gt;
+&lt;button (click)="cart.add('Mango Lassi')"&gt;Add Lassi — ₹90&lt;/button&gt;</pre>
+      <p>The tray reads the same clipboard — <code>cart.html</code>:</p>
+      <pre>&lt;h2&gt;Your Tray&lt;/h2&gt;
+&lt;ul&gt;
+  @for (item of cart.items; track $index) { &lt;li&gt;{{ item }}&lt;/li&gt; }
+&lt;/ul&gt;</pre>
+      <p>Signage — <code>app.routes.ts</code>, then put <code>&lt;router-outlet /&gt;</code> plus two <code>routerLink</code> anchors in the App template (add RouterOutlet and RouterLink to the App component's imports):</p>
+      <pre>export const routes: Routes = [
+  { path: '', redirectTo: 'menu', pathMatch: 'full' },
+  { path: 'menu', component: Menu },
+  { path: 'cart', component: Cart },
+];</pre>
+      <div class="check">Clicking Add on /menu, then navigating to /cart, shows the item — two components, one service instance.</div>
+      <div class="check">Refresh the page: the cart is empty again. The clipboard lives in memory — persistence comes later, in the kitchens.</div>
+      <div class="check">Say it out loud: "the component asked, the injector provided." That is dependency injection.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>In my Angular app biryani-counter (standalone components, latest CLI),
+build a two-page flow: a Menu page listing 3 items with Add buttons and
+a Cart page listing what was added. Share state through an injectable
+CartService provided in root. Wire routes /menu and /cart with a nav bar,
+default-redirect to /menu. Show me each file you create or edit.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Items added on /menu appear on /cart without any page reload.</div>
+      <div class="check">Exactly one CartService holds the state (providedIn: 'root'), no duplicated arrays in components.</div>
+      <div class="check">Visiting / redirects to /menu; nav links use routerLink, not href.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>staff never buy private clipboards — they ask the manager for the shared one</b>, and that is dependency injection in a sentence.</div>
+  </section>
+  <section class="next">Next: one counter is easy. Farid explains how he runs many counters on one floor without them stepping on each other — single-spa.</section>
+  `,
+  quiz:[
+    {q:"Menu and Cart both need the same cart data. The Angular way is…",
+     options:["Copy the array into both components","A shared service injected into both","Store it in the URL","Emit a global window event"],answer:1,
+     why:"One clipboard, held by the manager: a root-provided service gives both components the same instance."},
+    {q:"Dependency injection means…",
+     options:["Components create their own dependencies with new","A class declares what it needs and the framework supplies the instance","Installing npm packages","Copying code between files"],answer:1,
+     why:"The staff ask the manager for the clipboard; they never buy their own. Declare the need, Angular provides it."},
+    {q:"What decides which component renders inside router-outlet?",
+     options:["The order of imports","The current URL matched against the routes table","The component's file name","CSS z-index"],answer:1,
+     why:"Routes are floor signage: URL /cart matches its route entry, so the Cart component mounts there."}
+  ]
+},
+{
+  id:"m05", track:"T1", trackName:"Angular + single-spa",
+  title:"Why single-spa?", minutes:20,
+  concepts:["microfrontends","root config","registerApplication","activity functions"],
+  analogyBeat:"Farid decides which counters open on which floor tiles",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 5</div>
+    <p>Friday rush. Farid stands at the floor plan with his clipboard. He does not cook, and he never has. His clipboard has three columns per stall: the <b>stall name</b>, <b>where the crew's van parks</b>, and <b>which floor tiles they occupy, and when</b>.</p>
+    <p>The Juice Counter only opens after 4 p.m. Over the weekend, a counter was swapped for a renovated one — customers never noticed, and the floor never closed.</p>
+    <p>"One crew, one counter, one van," Farid says. "I just say where and when."</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Farid never cooks — he coordinates</h2>
+    <p>"Farid doesn't cook anything. He just decides which counters are open and where they appear on the floor — and he can swap a counter without closing the food court." That is <b>single-spa</b>:</p>
+    <table>
+      <tr><th>On the floor</th><th>In single-spa</th></tr>
+      <tr><td>A stall counter</td><td>a <b>microfrontend</b> — one team's independently built &amp; deployed UI</td></tr>
+      <tr><td>Farid with his clipboard</td><td>the <b>root config</b> — a tiny app whose only job is coordination</td></tr>
+      <tr><td>One clipboard row per stall</td><td>one <b>registerApplication(...)</b> call per microfrontend</td></tr>
+      <tr><td>"Which tiles, when" column</td><td>the <b>activity function</b> (activeWhen) — usually a URL check</td></tr>
+      <tr><td>Where the crew's van parks</td><td>the <b>app loader</b> — where to fetch that app's JavaScript</td></tr>
+    </table>
+    <p>Why bother? Because five teams sharing one giant Angular app must release together, break together, and argue together. Give each team its own counter and Farid just points at tiles.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 250" role="img" aria-label="single-spa root config mounting one of two microfrontends based on the URL">
+      <defs>
+        <marker id="a5S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a5G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx5{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb5{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm5{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp5{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a5S)}
+        .ev5{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a5G)}
+      </style>
+      <rect class="bx5" x="20" y="20" width="180" height="50" rx="8"/>
+      <text class="lb5" x="34" y="42">Anu's browser 👤</text>
+      <text class="sm5" x="34" y="58">URL: /biryani</text>
+      <rect class="bx5" x="250" y="15" width="200" height="60" rx="8"/>
+      <text class="lb5" x="264" y="37">Farid (root config)</text>
+      <text class="sm5" x="264" y="53">reads URL → checks clipboard</text>
+      <rect class="bx5" x="250" y="120" width="200" height="46" rx="8"/>
+      <text class="lb5" x="264" y="140">Biryani MFE (Angular)</text>
+      <text class="sm5" x="264" y="156">activeWhen: /biryani ✓ MOUNT</text>
+      <rect class="bx5" x="250" y="185" width="200" height="46" rx="8"/>
+      <text class="lb5" x="264" y="205">Dosa MFE (Angular)</text>
+      <text class="sm5" x="264" y="221">activeWhen: /dosa ✗ UNMOUNT</text>
+      <path class="hp5" d="M202 45 H248"/>
+      <path class="ev5" d="M340 77 V118"/>
+      <path class="ev5" d="M370 77 C 370 100 500 90 500 185 C 500 200 460 205 452 205" opacity="0.55"/>
+      <text class="sm5" x="470" y="130">mount / unmount</text>
+    </svg>
+    <figcaption><b>Food court:</b> Anu walks toward the biryani tiles; Farid checks his clipboard, opens that counter, and quietly closes the dosa one.<br>
+    <b>Technical:</b> on every URL change, single-spa evaluates each app's activity function and mounts the apps that return true, unmounting the rest — no page reload.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>No build today</b> — read one file until it feels obvious. This is an entire root config; note what is <i>missing</i>: no templates, no menus, no business logic.</p>
+      <pre>import { registerApplication, start } from 'single-spa';
+
+registerApplication({
+  name: 'biryani-counter',                      // stall name on the clipboard
+  app: () => System.import('biryani-counter'),  // where the crew's van parks
+  activeWhen: (location) =>
+    location.pathname.startsWith('/biryani'),   // which floor tiles, when
+});
+
+registerApplication({
+  name: 'dosa-counter',
+  app: () => System.import('dosa-counter'),
+  activeWhen: (location) => location.pathname.startsWith('/dosa'),
+});
+
+start();                                        // Farid unlocks the doors</pre>
+      <div class="check">Cover the screen and answer: what happens when the URL changes from /biryani to /dosa? (Biryani unmounts, Dosa mounts — no reload.)</div>
+      <div class="check">Find the line that would change if the Biryani team moved their code to a CDN. (Only the app loader — Farid's clipboard, nothing else.)</div>
+      <div class="check">Explain why the root config never imports Angular. (Farid doesn't cook — coordination only.)</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>Here is a single-spa root config (paste the snippet above). Walk me
+through exactly what happens, step by step, when the browser URL changes
+from /biryani to /dosa. Then tell me: (1) what activeWhen would open an
+app on EVERY route, (2) how two apps could be mounted at the same time,
+and (3) one real risk of microfrontends that this file does not solve.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The walkthrough mentions both unmounting the old app and mounting the new one, with no full page reload.</div>
+      <div class="check">You get a working always-active activity function (e.g. () =&gt; true).</div>
+      <div class="check">At least one honest risk is named (shared dependencies, styling clashes, or version drift).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>Farid cooks nothing and yet decides everything Anu sees</b> — a root config in one sentence.</div>
+  </section>
+  <section class="next">Next: we actually do it — two Angular counters mounted, swapped, and served on one floor.</section>
+  `,
+  quiz:[
+    {q:"What UI does the single-spa root config itself render?",
+     options:["The navigation bar","All shared components","Essentially none — it mounts and unmounts registered apps","The login page"],answer:2,
+     why:"Farid has no stove. The root config is pure coordination; the microfrontends render everything."},
+    {q:"When an app's activity function returns true for the current URL…",
+     options:["The app is downloaded and mounted","The app is deleted","The page fully reloads","Nothing happens until refresh"],answer:0,
+     why:"activeWhen true = 'your tiles are active': single-spa loads (if needed) and mounts the app in place."},
+    {q:"The strongest reason to adopt microfrontends is…",
+     options:["Faster animations","Independent teams shipping UIs on independent schedules","Smaller JavaScript overall","Better SEO"],answer:1,
+     why:"Each crew renovates its own counter without closing the floor — team autonomy is the point (and it costs complexity)."}
+  ]
+},
+{
+  id:"m06", track:"T1", trackName:"Angular + single-spa",
+  title:"Two Counters, One Floor", minutes:35,
+  concepts:["create-single-spa","import map","mounting MFEs","independent deploys"],
+  analogyBeat:"The Dosa Counter joins the Biryani Counter on the same floor",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 6</div>
+    <p>Monday. The Dosa Counter crew arrives with their own van, their own chalk, their own recipes. They have never met the Biryani crew, and they never need to.</p>
+    <p>Farid adds one row to his clipboard and points at six empty tiles. By lunch, two counters serve side by side on one floor.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Three projects, one floor</h2>
+    <table>
+      <tr><th>On the floor</th><th>In your workspace</th></tr>
+      <tr><td>The floor + Farid's clipboard</td><td>the <b>root config</b> project (serves the shell page, ~port 9000)</td></tr>
+      <tr><td>Each counter crew</td><td>an Angular <b>single-spa application</b> (its own repo-worthy project)</td></tr>
+      <tr><td>The van-parking registry</td><td>the <b>import map</b> — app name → URL of its JavaScript</td></tr>
+      <tr><td>Each crew's loading dock</td><td>a dev-server <b>port</b> (4201, 4202…)</td></tr>
+    </table>
+    <p>The magic to notice: each app still runs on its own, but the root config can compose them — same code, two lives.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Root config on port 9000 loading two Angular microfrontends from ports 4201 and 4202 via the import map">
+      <defs>
+        <marker id="a6S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a6G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx6{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb6{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm6{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp6{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a6S)}
+        .ev6{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a6G)}
+      </style>
+      <rect class="bx6" x="20" y="90" width="160" height="50" rx="8"/>
+      <text class="lb6" x="34" y="112">Anu 👤</text><text class="sm6" x="34" y="128">localhost:9000</text>
+      <rect class="bx6" x="240" y="80" width="200" height="70" rx="8"/>
+      <text class="lb6" x="254" y="102">spice-root :9000</text>
+      <text class="sm6" x="254" y="118">root config + import map</text>
+      <text class="sm6" x="254" y="134">"the floor"</text>
+      <rect class="bx6" x="480" y="20" width="150" height="60" rx="8"/>
+      <text class="lb6" x="492" y="42">biryani :4201</text><text class="sm6" x="492" y="60">Angular MFE</text>
+      <rect class="bx6" x="480" y="160" width="150" height="60" rx="8"/>
+      <text class="lb6" x="492" y="182">dosa :4202</text><text class="sm6" x="492" y="200">Angular MFE</text>
+      <path class="hp6" d="M182 115 H238"/>
+      <path class="ev6" d="M442 95 C 462 90 460 60 478 55"/>
+      <path class="ev6" d="M442 135 C 462 140 460 180 478 185"/>
+      <text class="sm6" x="440" y="120">import map</text>
+      <text class="sm6" x="440" y="134">fetch main.js</text>
+    </svg>
+    <figcaption><b>Food court:</b> Anu enters through one door; Farid's registry says which dock each crew loads in from, and both counters appear on his floor.<br>
+    <b>Technical:</b> the browser loads the shell from :9000; the import map resolves each app name to its dev server, and single-spa mounts whichever app matches the route.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Three scaffolds.</b> Use org name <code>spiceroute</code> everywhere. Start from a clean folder (a completed, tested copy of all three projects lives in <code>labs/t1-single-spa/</code> — use it whenever you're stuck):</p>
+      <pre># 1) The floor — a root config (answer: TypeScript? No · Layout Engine? Yes)
+npx create-single-spa@latest spice-root --moduleType root-config --orgName spiceroute --packageManager npm
+
+# 2) Two counters — Angular apps that learn the single-spa lifecycle
+npx @angular/cli@20 new biryani-counter --defaults
+cd biryani-counter
+npx ng add single-spa-angular --skip-confirmation
+npm install
+#    repeat for dosa-counter</pre>
+      <p><i>Version-drift fixes</i> (tool generations moved at different speeds; the reference files in <code>labs/t1-single-spa/</code> have all three ready to copy): ① replace <code>src/main.single-spa.ts</code> with the standalone-Angular version, ② simplify the build options in <code>angular.json</code>, ③ in the root config, force SystemJS output in <code>webpack.config.js</code> so the floor and the UMD Angular bundles speak one module format.</p>
+      <p>Register both counters. In <code>spice-root/src/microfrontend-layout.html</code>:</p>
+      <pre>&lt;single-spa-router&gt;
+  &lt;route path="biryani"&gt;
+    &lt;application name="biryani-counter"&gt;&lt;/application&gt;
+  &lt;/route&gt;
+  &lt;route path="dosa"&gt;
+    &lt;application name="dosa-counter"&gt;&lt;/application&gt;
+  &lt;/route&gt;
+&lt;/single-spa-router&gt;</pre>
+      <p>Park the vans. In <code>spice-root/src/index.ejs</code>, add both apps to the import map:</p>
+      <pre>{
+  "imports": {
+    "biryani-counter": "//localhost:4201/main.js",
+    "dosa-counter": "//localhost:4202/main.js"
+  }
+}</pre>
+      <p>Three terminals (your generated scripts may differ slightly — the ports are what matter):</p>
+      <pre>cd spice-root;       npm start             # :9000
+cd biryani-counter;  npm start -- --port 4201
+cd dosa-counter;     npm start -- --port 4202</pre>
+      <div class="check">http://localhost:9000/biryani shows the biryani app; /dosa swaps to the dosa app.</div>
+      <div class="check">Open DevTools → Network while switching routes: JavaScript loads, but the document never reloads.</div>
+      <div class="check">Each counter still runs standalone on its own port — same code, composed by the floor.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I am on Windows PowerShell with Node 20 and have never used single-spa.
+Using create-single-spa, scaffold: (1) a root config project spice-root
+with org name spiceroute, and (2) two Angular single-spa applications,
+biryani-counter and dosa-counter. Wire the root config layout so /biryani
+mounts the first and /dosa mounts the second, with import-map entries
+pointing at localhost:4201 and localhost:4202. Give me every command,
+every file edit, and the three commands to run all projects together.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">localhost:9000/biryani and /dosa each mount the right app, with no full page reload when switching.</div>
+      <div class="check">The import map in the root config lists both apps by name with their ports.</div>
+      <div class="check">Stopping the dosa dev server breaks only /dosa — /biryani keeps working (one stall closes, the floor serves on).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>two crews who never met serve side by side</b> because Farid's clipboard says where each one stands.</div>
+  </section>
+  <section class="next">Next track: Anu is tired of walking stall to stall to order. We unbox Kiosk-7 — the NestJS kiosk that will talk to every kitchen for her.</section>
+  `,
+  quiz:[
+    {q:"What does the import map do?",
+     options:["Bundles all apps into one file","Maps each app name to the URL its JavaScript loads from","Defines Angular routes","Installs npm packages"],answer:1,
+     why:"It is the van-parking registry: name → where the code lives. Change a URL there and Farid loads the crew from the new dock."},
+    {q:"Who mounts and unmounts the microfrontends when the URL changes?",
+     options:["Each Angular app itself","The browser automatically","The single-spa root config","The import map"],answer:2,
+     why:"The root config evaluates routes/activity functions and swaps apps — Farid alone runs the floor."},
+    {q:"The dosa dev server crashes. What happens at localhost:9000?",
+     options:["The whole shell goes down","/dosa fails to load but /biryani still works","Both apps break","single-spa restarts it"],answer:1,
+     why:"One stall closes; the food court keeps serving. Failure isolation is the payoff of independent counters."}
+  ]
+},
+{
+  id:"m07", track:"T2", trackName:"NestJS",
+  title:"NestJS Hello World", minutes:20,
+  concepts:["NestJS CLI","controllers","decorators","watch mode"],
+  analogyBeat:"Kiosk-7 is unboxed and switched on",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 7</div>
+    <p>A crate arrives on the floor, stencilled <b>KIOSK-7</b>. Inside: a touch screen, a till, and a crew of clerks — each wearing a <b>name badge</b> that says exactly what they handle. The clerk at the front desk wears one reading "I answer greetings".</p>
+    <p>Farid plugs it in. It boots in seconds and greets the first passer-by. It cannot take real orders yet — but it is alive, and every clerk knows their job from the badge alone.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>A kiosk staffed by badges</h2>
+    <p>"Anu shouldn't have to walk to three kitchens. Kiosk-7 takes one order and quietly talks to every kitchen for her." Before it can do that, meet its anatomy — <b>NestJS</b>, a Node framework with Angular-like structure (you already know the shapes!):</p>
+    <table>
+      <tr><th>At the kiosk</th><th>In NestJS</th></tr>
+      <tr><td>The Kiosk-7 crate</td><td>a generated project (<code>nest new</code>)</td></tr>
+      <tr><td>A service desk facing customers</td><td>a <b>controller</b> — receives HTTP requests</td></tr>
+      <tr><td>A clerk's name badge</td><td>a <b>decorator</b> — <code>@Controller()</code>, <code>@Get()</code> — declares who handles what</td></tr>
+      <tr><td>The rulebook binding the desks together</td><td>a <b>module</b> (<code>@Module</code>)</td></tr>
+      <tr><td>Switching the kiosk on</td><td><code>npm run start:dev</code> — watch mode, restarts on save</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 210" role="img" aria-label="Browser GET request handled by a NestJS controller method marked with the Get decorator">
+      <defs>
+        <marker id="a7S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx7{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb7{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm7{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp7{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a7S)}
+      </style>
+      <rect class="bx7" x="20" y="70" width="150" height="50" rx="8"/>
+      <text class="lb7" x="34" y="92">Anu 👤</text><text class="sm7" x="34" y="108">GET localhost:3000</text>
+      <rect x="230" y="20" width="390" height="170" rx="10" fill="none" stroke="#1A1714" stroke-width="1.5"/>
+      <text class="sm7" x="244" y="42">Kiosk-7 (NestJS app) · :3000</text>
+      <rect class="bx7" x="250" y="56" width="350" height="54" rx="8"/>
+      <text class="lb7" x="264" y="76">@Controller()  ← desk badge</text>
+      <text class="sm7" x="264" y="94">@Get() getHello() ← clerk badge</text>
+      <rect class="bx7" x="250" y="124" width="350" height="46" rx="8"/>
+      <text class="lb7" x="264" y="144">AppService (provider)</text>
+      <text class="sm7" x="264" y="160">returns "Hello World!"</text>
+      <path class="hp7" d="M172 95 C 200 95 202 83 248 83"/>
+      <path class="hp7" d="M420 112 V122"/>
+    </svg>
+    <figcaption><b>Food court:</b> Anu greets the kiosk; the front-desk clerk (whose badge says "greetings") answers, reading the phrase from the house script.<br>
+    <b>Technical:</b> the request hits the controller; the @Get() method delegates to a provider and returns the response body.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Unbox it.</b> From a clean folder (choose <code>npm</code> when asked):</p>
+      <pre>npx @nestjs/cli@latest new kiosk-7
+cd kiosk-7
+npm run start:dev</pre>
+      <p>Open <code>http://localhost:3000</code> — "Hello World!". Now read <code>src/app.controller.ts</code>; it is the whole story:</p>
+      <pre>@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}</pre>
+      <p>Change the greeting where it actually lives — <code>src/app.service.ts</code>:</p>
+      <pre>getHello(): string {
+  return 'Kiosk-7 online 🟢 What would you like to order?';
+}</pre>
+      <div class="check">Save, and the terminal shows Nest restarting; refresh :3000 to see the new greeting — watch mode at work.</div>
+      <div class="check">Spot the pattern from m04: the controller asks for AppService in its constructor. Same dependency injection, kiosk edition.</div>
+      <div class="check">Name the two badges in the file and what each declares. (@Controller = this desk takes requests; @Get = this clerk handles GETs.)</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I have a fresh NestJS app called kiosk-7 (created with nest new, running
+via npm run start:dev). Add a GET /menu endpoint that returns a JSON
+array of 3 food-court menu items, each with a name, price in rupees, and
+the stall it comes from. Put the data in a provider, not the controller.
+Show me the files you create or change and why the logic belongs in the
+provider.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">GET localhost:3000/menu returns a JSON array of 3 items with name, price, and stall.</div>
+      <div class="check">The controller method is 1–2 lines; the data lives in an @Injectable() provider.</div>
+      <div class="check">The server picked the change up automatically in watch mode.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>Kiosk-7 boots with clerks already wearing name badges</b> — decorators tell Nest who handles what before a single request arrives.</div>
+  </section>
+  <section class="next">Next: Kiosk-7 learns to take a real order — controllers receive, DTOs check the slip, providers do the work.</section>
+  `,
+  quiz:[
+    {q:"@Get() above a controller method is…",
+     options:["A TypeScript type","A decorator marking the method as the handler for GET requests","An import statement","A test annotation"],answer:1,
+     why:"It is the clerk's name badge: metadata that tells Nest which requests this method serves."},
+    {q:"What is a controller's proper job?",
+     options:["Hold all business logic","Receive requests and return responses, delegating work to providers","Talk to the database directly","Render HTML templates"],answer:1,
+     why:"The front desk takes the request and hands it on. Thin controllers, busy providers."},
+    {q:"npm run start:dev gives you…",
+     options:["A production build","Watch mode — the server restarts automatically on every save","A Docker image","A debugger only"],answer:1,
+     why:"Like the Angular dev server at the counters: save the file, the kiosk restarts itself."}
+  ]
+},
+{
+  id:"m08", track:"T2", trackName:"NestJS",
+  title:"Controllers, Providers & Modules", minutes:25,
+  concepts:["providers","DTOs","request pipeline","modules"],
+  analogyBeat:"Kiosk-7 learns the menu: take an order, validate it, file it",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 8</div>
+    <p>Anu taps "One Hyderabadi Biryani" on Kiosk-7. Watch what happens inside. The <b>front-desk clerk</b> takes the slip but cooks nothing and remembers nothing. First she checks the slip is filled in properly — an item, a sensible quantity, nothing missing.</p>
+    <p>Then she hands it to the <b>back-office clerk</b>, who stamps it with an order number and files it in the order tray. Front desk takes, back office keeps. Nobody does both jobs.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>The request pipeline</h2>
+    <table>
+      <tr><th>Inside the kiosk</th><th>In NestJS</th></tr>
+      <tr><td>The front-desk clerk</td><td>the <b>controller</b> (OrdersController)</td></tr>
+      <tr><td>The printed order-slip format</td><td>a <b>DTO</b> — CreateOrderDto defines the expected shape of the request body</td></tr>
+      <tr><td>Checking the slip is filled in</td><td><b>validation</b> of the incoming body against the DTO</td></tr>
+      <tr><td>The back-office clerk</td><td>a <b>provider</b> (OrdersService) — the business logic</td></tr>
+      <tr><td>The order tray</td><td>an in-memory array (a real pantry ledger arrives in Track 3)</td></tr>
+      <tr><td>The department they all belong to</td><td>a <b>module</b> (OrdersModule) grouping them</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 130" role="img" aria-label="POST request flowing through controller, DTO check, service, and in-memory store">
+      <defs>
+        <marker id="a8S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx8{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb8{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm8{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp8{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a8S)}
+      </style>
+      <rect class="bx8" x="12" y="35" width="110" height="52" rx="8"/>
+      <text class="lb8" x="24" y="57">POST /orders</text><text class="sm8" x="24" y="74">Anu's order</text>
+      <rect class="bx8" x="160" y="35" width="120" height="52" rx="8"/>
+      <text class="lb8" x="172" y="57">Controller</text><text class="sm8" x="172" y="74">front desk</text>
+      <rect class="bx8" x="318" y="35" width="110" height="52" rx="8"/>
+      <text class="lb8" x="330" y="57">DTO check</text><text class="sm8" x="330" y="74">slip filled in?</text>
+      <rect class="bx8" x="466" y="35" width="110" height="52" rx="8"/>
+      <text class="lb8" x="478" y="57">Service</text><text class="sm8" x="478" y="74">back office</text>
+      <path class="hp8" d="M124 61 H158"/><path class="hp8" d="M282 61 H316"/><path class="hp8" d="M430 61 H464"/>
+      <text class="sm8" x="480" y="110">→ orders[] (the tray)</text>
+    </svg>
+    <figcaption><b>Food court:</b> slip in at the front desk, format checked, then stamped and filed by the back office in the tray.<br>
+    <b>Technical:</b> the request body is bound to CreateOrderDto, the controller delegates to OrdersService, and the service appends to its in-memory array and returns the stamped order.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p>Inside <code>kiosk-7</code>, generate the department:</p>
+      <pre>npx nest g module orders
+npx nest g controller orders
+npx nest g service orders</pre>
+      <p>The slip format — <code>src/orders/create-order.dto.ts</code>:</p>
+      <pre>export class CreateOrderDto {
+  item: string;
+  qty: number;
+}</pre>
+      <p>The back office — <code>orders.service.ts</code>:</p>
+      <pre>@Injectable()
+export class OrdersService {
+  private orders: any[] = [];   // the tray
+
+  create(dto: CreateOrderDto) {
+    const order = { id: this.orders.length + 1, ...dto, status: 'RECEIVED' };
+    this.orders.push(order);
+    return order;               // stamped with an id
+  }
+
+  findAll() { return this.orders; }
+}</pre>
+      <p>The front desk — <code>orders.controller.ts</code>:</p>
+      <pre>@Controller('orders')
+export class OrdersController {
+  constructor(private readonly orders: OrdersService) {}
+
+  @Post()
+  create(@Body() dto: CreateOrderDto) { return this.orders.create(dto); }
+
+  @Get()
+  findAll() { return this.orders.findAll(); }
+}</pre>
+      <p>Order like Anu (new terminal, server still running):</p>
+      <pre>Invoke-RestMethod -Method Post -Uri http://localhost:3000/orders -ContentType "application/json" -Body '{ "item": "Hyderabadi Biryani", "qty": 1 }'
+Invoke-RestMethod http://localhost:3000/orders</pre>
+      <div class="check">The POST returns your order with an id and status RECEIVED.</div>
+      <div class="check">The GET lists every order placed since the last restart — and restarting empties the tray (in-memory!).</div>
+      <div class="check">Trace one request out loud: body → DTO → controller → service → array. Five words each.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>In my NestJS app kiosk-7, create an orders feature: module, controller,
+service. POST /orders accepts { item: string, qty: number } via a
+CreateOrderDto, and the service stores orders in memory with an
+incrementing id and status RECEIVED. GET /orders lists them. Then add
+validation with class-validator so that a missing item or a qty below 1
+is rejected with a 400, and show me how to test both the happy path and
+a bad request with Invoke-RestMethod.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Valid POSTs return the stored order; GET /orders shows the growing list.</div>
+      <div class="check">A POST with qty 0 or no item returns HTTP 400 with a helpful message.</div>
+      <div class="check">The controller contains no business logic — the service owns the array.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>the front desk takes the slip and the back office files it</b> — controllers receive, providers do.</div>
+  </section>
+  <section class="next">Next: the whole reason Kiosk-7 exists — one tap, many kitchens. The BFF pattern.</section>
+  `,
+  quiz:[
+    {q:"A DTO's job is to…",
+     options:["Store data in the database","Define the expected shape of data crossing the API boundary","Style the response","Route requests"],answer:1,
+     why:"It is the printed slip format: it says exactly which fields an incoming order must carry."},
+    {q:"Why does the orders array live in the service rather than the controller?",
+     options:["Controllers cannot hold fields","Logic and state in providers keeps controllers thin, reusable, and testable","It is faster","Modules require it"],answer:1,
+     why:"The front desk should never keep the files. Any future controller (or Kafka consumer!) can reuse the same service."},
+    {q:"You restart the kiosk and GET /orders returns []. Why?",
+     options:["A bug in Nest","The orders lived in process memory — gone on restart","The DTO deleted them","The module reset the route"],answer:1,
+     why:"The tray is in-memory. That pain is deliberate: Track 3 gives the kitchens real pantry ledgers (databases)."}
+  ]
+},
+{
+  id:"m09", track:"T2", trackName:"NestJS",
+  title:"The BFF Pattern", minutes:25,
+  concepts:["BFF pattern","aggregation","parallel fan-out","frontend-shaped APIs"],
+  analogyBeat:"Anu orders biryani + juice in ONE tap; Kiosk-7 fans out",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 9</div>
+    <p>Anu wants biryani <i>and</i> a mango lassi. Without the kiosk, she walks to two counters, queues twice, pays twice, and holds two receipts.</p>
+    <p>With Kiosk-7 she taps once. The kiosk rings the Biryani Kitchen and the Juice Kitchen <b>at the same time</b>, waits for both answers, and prints <b>one combined receipt</b> shaped exactly the way Anu likes to read it. The kitchens changed nothing. Anu's evening just got shorter.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Backend-for-Frontend</h2>
+    <p>A <b>BFF</b> is a backend whose only customer is one frontend. It exists to make the frontend's life easy:</p>
+    <table>
+      <tr><th>At the kiosk</th><th>In the BFF</th></tr>
+      <tr><td>One tap instead of two queues</td><td>the frontend makes <b>one request</b> instead of N</td></tr>
+      <tr><td>Ringing both kitchens at once</td><td><b>parallel fan-out</b> — Promise.all over two HTTP calls</td></tr>
+      <tr><td>One combined receipt</td><td><b>aggregation</b> — merging responses into one object</td></tr>
+      <tr><td>Receipt formatted the way Anu reads</td><td>a <b>frontend-shaped API</b> — fields the UI needs, nothing more</td></tr>
+      <tr><td>Kitchens unchanged</td><td>downstream services stay generic and reusable</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Browser makes one request to the BFF, which fans out to two services in parallel and merges the answers">
+      <defs>
+        <marker id="a9S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx9{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb9{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm9{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp9{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a9S)}
+      </style>
+      <rect class="bx9" x="20" y="90" width="150" height="56" rx="8"/>
+      <text class="lb9" x="34" y="112">Anu 👤</text><text class="sm9" x="34" y="130">GET /receipt · 1 tap</text>
+      <rect class="bx9" x="240" y="85" width="180" height="66" rx="8"/>
+      <text class="lb9" x="254" y="107">Kiosk-7 (NestJS)</text>
+      <text class="sm9" x="254" y="124">Promise.all(...)</text>
+      <text class="sm9" x="254" y="140">merge → one receipt</text>
+      <rect class="bx9" x="480" y="25" width="150" height="56" rx="8"/>
+      <text class="lb9" x="492" y="47">kitchen stub</text><text class="sm9" x="492" y="65">:3100/kitchen</text>
+      <rect class="bx9" x="480" y="155" width="150" height="56" rx="8"/>
+      <text class="lb9" x="492" y="177">billing stub</text><text class="sm9" x="492" y="195">:3100/billing</text>
+      <path class="hp9" d="M172 118 H238"/>
+      <path class="hp9" d="M422 100 C 452 95 450 60 478 55"/>
+      <path class="hp9" d="M422 136 C 452 141 450 178 478 183"/>
+      <text class="sm9" x="430" y="128">in parallel</text>
+    </svg>
+    <figcaption><b>Food court:</b> one tap; the kiosk rings both kitchens simultaneously and prints one receipt.<br>
+    <b>Technical:</b> the BFF endpoint fires two HTTP requests with Promise.all, awaits both, and returns a single merged JSON object shaped for the UI.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Stub the kitchens first.</b> In a clean folder, create <code>db.json</code>:</p>
+      <pre>{
+  "kitchen": { "orderId": 42, "item": "Hyderabadi Biryani", "status": "COOKING" },
+  "billing": { "orderId": 42, "total": 180, "paid": true }
+}</pre>
+      <pre>npx json-server db.json --port 3100</pre>
+      <p>Two fake kitchens now answer at <code>/kitchen</code> and <code>/billing</code>. In <code>kiosk-7</code>, generate a receipt feature (<code>npx nest g module receipt</code>, controller, service) and give the service the fan-out:</p>
+      <pre>@Injectable()
+export class ReceiptService {
+  async receipt() {
+    const [kitchen, billing] = await Promise.all([
+      fetch('http://localhost:3100/kitchen').then(r => r.json()),
+      fetch('http://localhost:3100/billing').then(r => r.json()),
+    ]);
+    return {                       // one receipt, UI-shaped
+      orderId: kitchen.orderId,
+      item: kitchen.item,
+      status: kitchen.status,
+      total: billing.total,
+      paid: billing.paid,
+    };
+  }
+}</pre>
+      <p>Controller: <code>@Get() receipt() { return this.service.receipt(); }</code> under <code>@Controller('receipt')</code>.</p>
+      <div class="check">GET localhost:3000/receipt returns ONE object with item, status, total, and paid — data from two different sources.</div>
+      <div class="check">Stop json-server and hit /receipt again: the kiosk errors. Feel that — a kitchen not answering hurts the whole receipt. Meenakshi (Camunda, Track 4) and the ticket rail (Kafka, Track 5) exist for exactly this pain.</div>
+      <div class="check">Explain why Promise.all beats calling the stubs one after the other. (Both kitchens cook simultaneously — total wait = the slower one, not the sum.)</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>In my NestJS app kiosk-7, build a BFF endpoint GET /receipt that calls
+two stub endpoints (http://localhost:3100/kitchen and
+http://localhost:3100/billing, served by json-server) in parallel with
+Promise.all, merges the answers into one flat receipt object, and — this
+is the important part — handles failure: if either stub is down, return
+HTTP 502 with a JSON body naming which dependency failed instead of an
+unhandled error. Show me how to test all three cases.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Happy path: one merged JSON receipt from two upstream calls made in parallel.</div>
+      <div class="check">With json-server stopped, /receipt returns a clean 502 naming the failed dependency.</div>
+      <div class="check">The controller stays thin; fan-out and merging live in the service.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>Anu taps once and Kiosk-7 does the walking</b> — a BFF turns many backend calls into one frontend-shaped answer.</div>
+  </section>
+  <section class="next">Next track: enough stubs — we build the real kitchens. Spring Boot fires its first stove.</section>
+  `,
+  quiz:[
+    {q:"A Backend-for-Frontend is…",
+     options:["A database for the UI","A backend tailored to one frontend, aggregating downstream services for it","A CDN","A frontend framework"],answer:1,
+     why:"Kiosk-7 serves Anu alone: it fans out, merges, and shapes responses for that one screen."},
+    {q:"Promise.all over two fetches means…",
+     options:["The calls run one after another","Both calls run in parallel; you wait only as long as the slower one","Only the first call runs","The calls are cached"],answer:1,
+     why:"Ring both kitchens at once — total wait is max(A, B), not A + B."},
+    {q:"The biggest win of the BFF for the frontend team is…",
+     options:["Fewer npm packages","One request returning UI-shaped data instead of stitching N generic APIs in the browser","Free HTTPS","Faster CSS"],answer:1,
+     why:"The receipt arrives pre-merged and pre-shaped; the counter just displays it."}
+  ]
+},
+{
+  id:"m10", track:"T3", trackName:"Spring Boot",
+  title:"Spring Boot Hello World", minutes:20,
+  concepts:["start.spring.io","@RestController","embedded server","Maven"],
+  analogyBeat:"The Biryani Kitchen fires its first stove",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 10</div>
+    <p>Behind the counters, the Biryani Kitchen is still bare steel. The head chef does not weld her own stove. She orders a <b>kitchen starter kit</b>: stove, hood, gas fitting, and wiring pre-assembled — tick the boxes for what you need, and it arrives ready to light.</p>
+    <p>One match. The stove roars. The kitchen answers its first call from the pass window: "Stove is hot!"</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Kitchens arrive as starter kits</h2>
+    <p>"Each kitchen is its own business: its own chefs, its own pantry, its own way of working." Kitchens are <b>Spring Boot</b> services, and they arrive pre-assembled:</p>
+    <table>
+      <tr><th>In the kitchen</th><th>In Spring Boot</th></tr>
+      <tr><td>The starter kit order form</td><td><b>start.spring.io</b> — tick dependencies, download a zip</td></tr>
+      <tr><td>Pre-fitted wiring and gas</td><td><b>auto-configuration</b> — sensible defaults, no XML plumbing</td></tr>
+      <tr><td>The stove built into the kitchen</td><td>the <b>embedded server</b> (Tomcat) — the app carries its own web server</td></tr>
+      <tr><td>The supplier catalogue</td><td><b>Maven</b> + <code>pom.xml</code> — declares and fetches dependencies</td></tr>
+      <tr><td>The chef at the pass window</td><td>a <b>@RestController</b> answering HTTP</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 150" role="img" aria-label="From start.spring.io zip through mvnw run to an embedded Tomcat answering GET /hello">
+      <defs>
+        <marker id="a10S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx10{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb10{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm10{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp10{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a10S)}
+      </style>
+      <rect class="bx10" x="12" y="40" width="140" height="60" rx="8"/>
+      <text class="lb10" x="24" y="62">start.spring.io</text><text class="sm10" x="24" y="80">tick: Web · Java 21</text>
+      <rect class="bx10" x="196" y="40" width="150" height="60" rx="8"/>
+      <text class="lb10" x="208" y="62">mvnw</text><text class="sm10" x="208" y="80">spring-boot:run</text>
+      <rect class="bx10" x="390" y="40" width="238" height="60" rx="8"/>
+      <text class="lb10" x="402" y="62">Biryani Kitchen :8080</text>
+      <text class="sm10" x="402" y="80">embedded Tomcat · GET /hello 🔥</text>
+      <path class="hp10" d="M154 70 H194"/><path class="hp10" d="M348 70 H388"/>
+    </svg>
+    <figcaption><b>Food court:</b> order the starter kit, strike one match, and the kitchen answers from the pass window.<br>
+    <b>Technical:</b> generate the project, run it with the Maven wrapper, and the embedded Tomcat serves your controller on port 8080 — no separate server install.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Order the kit.</b> At <a href="https://start.spring.io">start.spring.io</a> choose: <b>Maven</b> · Java <b>21</b> · latest stable Spring Boot · Group <code>com.spiceroute</code> · Artifact <code>biryani-kitchen</code> · Dependencies: <b>Spring Web</b>. Generate, unzip, open the folder in VS Code.</p>
+      <p>Put a chef at the pass window — new file <code>src/main/java/com/spiceroute/biryani_kitchen/HelloController.java</code>:</p>
+      <pre>package com.spiceroute.biryani_kitchen;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+  @GetMapping("/hello")
+  public String hello() {
+    return "Biryani Kitchen: stove is hot! 🔥";
+  }
+}</pre>
+      <p>Strike the match:</p>
+      <pre>./mvnw spring-boot:run</pre>
+      <div class="check">First run downloads half the internet (Maven filling the pantry) — that is normal and happens once.</div>
+      <div class="check">http://localhost:8080/hello answers from your kitchen.</div>
+      <div class="check">Spot the twins: @RestController + @GetMapping here, @Controller + @Get in Nest. Different language, same badges.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I have Java 21 on Windows PowerShell and have never used Spring Boot.
+Walk me through generating a Maven project from start.spring.io (group
+com.spiceroute, artifact biryani-kitchen, dependency Spring Web) — you
+can fetch the zip via the start.spring.io URL API if that is easier.
+Then add a @RestController with GET /hello returning a fun kitchen
+status string, run it with the Maven wrapper, and explain in two
+sentences what an embedded server is and why there is no Tomcat install
+step.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The project builds and runs with ./mvnw spring-boot:run on Java 21.</div>
+      <div class="check">GET localhost:8080/hello returns the custom string.</div>
+      <div class="check">You can repeat the embedded-server explanation without notes.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>kitchens arrive as starter kits with the stove built in</b> — Spring Boot apps ship their own server and run with one command.</div>
+  </section>
+  <section class="next">Next: a kitchen without a ledger loses orders — layers, JPA, and the H2 pantry ledger.</section>
+  `,
+  quiz:[
+    {q:"'Embedded server' means…",
+     options:["The server runs in the cloud","The web server (Tomcat) is packaged inside your app — run the jar, get a server","You must install Tomcat first","It only works in Docker"],answer:1,
+     why:"The stove is built into the kitchen: java -jar (or mvnw spring-boot:run) starts app and server together."},
+    {q:"start.spring.io is for…",
+     options:["Hosting your app","Generating a pre-configured project skeleton with the dependencies you tick","Monitoring services","Compiling Java online"],answer:1,
+     why:"It is the starter-kit order form — pick Maven, Java 21, Spring Web, and download a ready-to-run kit."},
+    {q:"@RestController on a class tells Spring…",
+     options:["To store it in the database","This class handles HTTP requests and returns response bodies directly","To run it on startup only","To hide it from other classes"],answer:1,
+     why:"It posts a chef at the pass window: mapped methods answer HTTP calls with data, not HTML views."}
+  ]
+},
+{
+  id:"m11", track:"T3", trackName:"Spring Boot",
+  title:"REST, Layers & Data", minutes:30,
+  concepts:["controller/service/repository","JPA entities","H2 database","layered architecture"],
+  analogyBeat:"The kitchen keeps a pantry ledger",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 11</div>
+    <p>The Biryani Kitchen gets organized. The <b>pass-window chef</b> takes requests. The <b>sous-chef</b> decides how each dish is actually made. And the <b>pantry keeper</b> writes every order into a ledger — nothing enters or leaves the pantry without a line in the book.</p>
+    <p>House rule: the pass-window chef never touches the ledger, and nobody grabs rice off the shelf without the pantry keeper. Everyone stays in their lane — and when Anu asks the counter where her order went, the ledger always has the answer.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Three layers, one lane each</h2>
+    <table>
+      <tr><th>In the kitchen</th><th>In Spring Boot</th></tr>
+      <tr><td>Pass-window chef</td><td><b>controller</b> — HTTP in, JSON out</td></tr>
+      <tr><td>Sous-chef</td><td><b>service</b> — business rules</td></tr>
+      <tr><td>Pantry keeper + ledger</td><td><b>repository</b> + database — the only path to stored data</td></tr>
+      <tr><td>A ledger line ("2× biryani, order 7")</td><td>a <b>JPA entity</b> — a Java class mapped to a table row</td></tr>
+      <tr><td>A practice ledger that resets nightly</td><td><b>H2</b> — an in-memory database, perfect for labs</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 150" role="img" aria-label="Layered flow: controller to service to repository to H2 database">
+      <defs>
+        <marker id="a11S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx11{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb11{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm11{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp11{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a11S)}
+      </style>
+      <rect class="bx11" x="12" y="40" width="140" height="60" rx="8"/>
+      <text class="lb11" x="24" y="62">Controller</text><text class="sm11" x="24" y="80">pass window</text>
+      <rect class="bx11" x="180" y="40" width="140" height="60" rx="8"/>
+      <text class="lb11" x="192" y="62">Service</text><text class="sm11" x="192" y="80">sous-chef</text>
+      <rect class="bx11" x="348" y="40" width="140" height="60" rx="8"/>
+      <text class="lb11" x="360" y="62">Repository</text><text class="sm11" x="360" y="80">pantry keeper</text>
+      <rect class="bx11" x="516" y="40" width="112" height="60" rx="8"/>
+      <text class="lb11" x="528" y="62">H2 DB</text><text class="sm11" x="528" y="80">the ledger</text>
+      <path class="hp11" d="M154 70 H178"/><path class="hp11" d="M322 70 H346"/><path class="hp11" d="M490 70 H514"/>
+    </svg>
+    <figcaption><b>Food court:</b> requests pass chef → sous-chef → pantry keeper → ledger, and never skip a step.<br>
+    <b>Technical:</b> controller delegates to service, service to repository; JPA translates entity objects to SQL rows in H2.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p>Generate a fresh kit at start.spring.io: artifact <code>kitchen-orders</code>, Java 21, dependencies <b>Spring Web</b>, <b>Spring Data JPA</b>, <b>H2 Database</b>. Unzip, open, then add four small files in the base package.</p>
+      <p>The ledger line — <code>KitchenOrder.java</code> (note: not "Order" — that word is reserved in SQL):</p>
+      <pre>@Entity
+public class KitchenOrder {
+  @Id @GeneratedValue
+  private Long id;
+  private String item;
+  private int qty;
+  // add getters and setters (VS Code: right-click → Source Action)
+}</pre>
+      <p>The pantry keeper — one line, Spring writes the SQL:</p>
+      <pre>public interface KitchenOrderRepository
+    extends JpaRepository&lt;KitchenOrder, Long&gt; {}</pre>
+      <p>Sous-chef and pass window:</p>
+      <pre>@Service
+public class OrderService {
+  private final KitchenOrderRepository repo;
+  public OrderService(KitchenOrderRepository repo) { this.repo = repo; }
+  public KitchenOrder place(KitchenOrder o) { return repo.save(o); }
+  public List&lt;KitchenOrder&gt; all() { return repo.findAll(); }
+}</pre>
+      <pre>@RestController
+@RequestMapping("/orders")
+public class OrderController {
+  private final OrderService service;
+  public OrderController(OrderService service) { this.service = service; }
+
+  @PostMapping
+  public KitchenOrder place(@RequestBody KitchenOrder o) { return service.place(o); }
+
+  @GetMapping
+  public List&lt;KitchenOrder&gt; all() { return service.all(); }
+}</pre>
+      <p>Run <code>./mvnw spring-boot:run</code>, then order twice and read the ledger:</p>
+      <pre>Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType "application/json" -Body '{ "item": "Hyderabadi Biryani", "qty": 2 }'
+Invoke-RestMethod http://localhost:8080/orders</pre>
+      <div class="check">POST returns the order with a database-generated id; GET lists all rows.</div>
+      <div class="check">Constructor injection again — third framework, same manager-hands-you-the-tool move.</div>
+      <div class="check">Restart the app: orders are gone. H2 in-memory is the practice ledger; a real one would be Postgres — same code, different URL.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>Create a Spring Boot 3 project (Maven, Java 21, artifact kitchen-orders,
+deps: Spring Web, Spring Data JPA, H2) implementing a kitchen orders API:
+POST /orders saves { item, qty } as a KitchenOrder JPA entity with a
+generated id, GET /orders lists all, GET /orders/{id} returns one or 404.
+Use controller → service → repository layers strictly. Also enable the
+H2 web console and tell me the JDBC URL so I can SEE my table. Give me
+Invoke-RestMethod commands to test every endpoint.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">All three endpoints work; unknown ids return 404, not a stack trace.</div>
+      <div class="check">The controller never touches the repository directly — service in between.</div>
+      <div class="check">You opened /h2-console and ran SELECT * FROM KITCHEN_ORDER with your rows visible.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>only the pantry keeper writes in the ledger</b> — only the repository touches the database.</div>
+  </section>
+  <section class="next">Next: the Dosa Kitchen opens next door with its own pantry — and we learn why kitchens never share ledgers.</section>
+  `,
+  quiz:[
+    {q:"Extending JpaRepository&lt;KitchenOrder, Long&gt; gives you…",
+     options:["An empty interface you must implement","save(), findAll(), findById() and more, generated by Spring","Only raw SQL access","A REST API automatically"],answer:1,
+     why:"The pantry keeper comes trained: Spring Data implements the standard ledger operations for you."},
+    {q:"Why insist on controller → service → repository instead of one class doing it all?",
+     options:["Java requires it","Each layer changes for different reasons — swap the DB or add rules without touching HTTP code","It runs faster","H2 only works that way"],answer:1,
+     why:"Lanes: pass window, sous-chef, pantry keeper. Small classes with one reason to change each."},
+    {q:"After a restart your H2 data is gone because…",
+     options:["JPA deleted it","H2 here runs in memory — the practice ledger resets with the process","The repository cache expired","Maven cleaned it"],answer:1,
+     why:"In-memory H2 lives and dies with the JVM. Real kitchens graduate to Postgres/MySQL — same repository code."}
+  ]
+},
+{
+  id:"m12", track:"T3", trackName:"Spring Boot",
+  title:"Two Kitchens, Two Pantries", minutes:25,
+  concepts:["one service one database","ports","service-to-service HTTP","RestClient"],
+  analogyBeat:"The Dosa Kitchen opens next door — separate pantry!",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 12</div>
+    <p>The Dosa Kitchen opens next door, and Farid is firm about the rules: <b>separate pantry, separate ledger, separate door number</b>. The dosa crew never rummages in the biryani pantry, however convenient it looks.</p>
+    <p>When the Biryani Kitchen needs a bill settled, it does not reach into the Billing Room's ledger. It knocks on door <b>8082</b> and asks. The Billing Room answers from its own books.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>One kitchen, one pantry — always</h2>
+    <table>
+      <tr><th>On the corridor</th><th>In your services</th></tr>
+      <tr><td>A door number</td><td>a <b>port</b> — order-service :8081, billing-service :8082</td></tr>
+      <tr><td>Separate pantry &amp; ledger per kitchen</td><td><b>one database per service</b> — nobody queries another service's tables</td></tr>
+      <tr><td>Knocking and asking</td><td><b>service-to-service HTTP</b> (Spring's RestClient)</td></tr>
+      <tr><td>Raiding a neighbour's pantry</td><td>❌ the <b>shared-database anti-pattern</b> — hidden coupling, broken autonomy</td></tr>
+    </table>
+    <p>Why so strict? If two kitchens share a pantry, neither can reorganize its shelves without breaking the other — and that is the monolith sneaking back in through the pantry door.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 220" role="img" aria-label="Order service on 8081 with its own database calls billing service on 8082 with its own database over HTTP">
+      <defs>
+        <marker id="a12S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx12{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb12{font:600 12px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm12{font:11px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp12{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a12S)}
+      </style>
+      <rect class="bx12" x="40" y="30" width="220" height="66" rx="8"/>
+      <text class="lb12" x="54" y="54">order-service :8081</text>
+      <text class="sm12" x="54" y="72">Biryani Kitchen (Spring Boot)</text>
+      <rect class="bx12" x="70" y="140" width="160" height="46" rx="8"/>
+      <text class="lb12" x="84" y="160">its own H2</text><text class="sm12" x="84" y="176">orders ledger</text>
+      <rect class="bx12" x="380" y="30" width="220" height="66" rx="8"/>
+      <text class="lb12" x="394" y="54">billing-service :8082</text>
+      <text class="sm12" x="394" y="72">Billing Room (Spring Boot)</text>
+      <rect class="bx12" x="410" y="140" width="160" height="46" rx="8"/>
+      <text class="lb12" x="424" y="160">its own H2</text><text class="sm12" x="424" y="176">billing ledger</text>
+      <path class="hp12" d="M262 60 H378"/>
+      <text class="sm12" x="272" y="52">POST /bills (knock &amp; ask)</text>
+      <path class="hp12" d="M150 98 V138"/>
+      <path class="hp12" d="M490 98 V138"/>
+      <line x1="240" y1="200" x2="400" y2="145" stroke="#C4531F" stroke-width="2"/>
+      <line x1="240" y1="145" x2="400" y2="200" stroke="#C4531F" stroke-width="2"/>
+      <text class="sm12" x="262" y="212">no cross-pantry access, ever</text>
+    </svg>
+    <figcaption><b>Food court:</b> two kitchens, two ledgers, one polite knock on door 8082 when billing is needed.<br>
+    <b>Technical:</b> each Spring Boot service owns its database; cross-service needs travel over HTTP, never over a shared schema.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Two kits.</b> From start.spring.io: <code>order-service</code> (Web, JPA, H2 — reuse your m11 code) and <code>billing-service</code> (Web only). Give each a door number in its <code>application.properties</code>:</p>
+      <pre># order-service
+server.port=8081
+# billing-service
+server.port=8082</pre>
+      <p>Billing answers knocks — in billing-service:</p>
+      <pre>@RestController
+public class BillingController {
+  @PostMapping("/bills")
+  public String charge(@RequestParam Long orderId) {
+    return "PAID-" + orderId;
+  }
+}</pre>
+      <p>The Biryani Kitchen knocks — in order-service:</p>
+      <pre>@Service
+public class BillingClient {
+  private final RestClient http = RestClient.create("http://localhost:8082");
+
+  public String charge(Long orderId) {
+    return http.post().uri("/bills?orderId=" + orderId)
+               .retrieve().body(String.class);
+  }
+}</pre>
+      <p>In OrderService, after <code>repo.save(o)</code>, call <code>billingClient.charge(saved.getId())</code> and return the receipt with the order. Run both apps in two terminals and place an order at :8081.</p>
+      <div class="check">POST to :8081/orders returns your order plus "PAID-1" fetched live from :8082.</div>
+      <div class="check">Stop billing-service and order again: order-service errors. One busy phone line took the order down — remember this pain until Track 5.</div>
+      <div class="check">Confirm the isolation: order-service has zero billing tables, billing-service has zero order tables.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>Create two Spring Boot 3 Maven projects (Java 21): order-service on port
+8081 (Spring Web, JPA, H2) and billing-service on port 8082 (Spring Web).
+billing-service exposes POST /bills?orderId=N returning "PAID-N".
+order-service saves orders to its own H2, then calls billing via
+RestClient and stores the returned receipt on the order. Handle billing
+being down: the order should still save, with status PENDING_PAYMENT
+instead of a 500. Give me commands to run both and test both scenarios.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">With both services up, an order comes back with a PAID-N receipt.</div>
+      <div class="check">With billing stopped, the order still saves with status PENDING_PAYMENT — no 500.</div>
+      <div class="check">Each service owns its data — no shared database, no cross-service table access.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>every kitchen keeps its own pantry and knocks on doors instead of raiding shelves</b> — one service, one database.</div>
+  </section>
+  <section class="next">Next track: who keeps a whole order honest across all these kitchens? Meenakshi laminates her checklist — BPMN.</section>
+  `,
+  quiz:[
+    {q:"Why does each microservice get its own database?",
+     options:["Databases are cheap","So each service can change its schema and tech freely — no hidden coupling through shared tables","SQL requires it","To use more ports"],answer:1,
+     why:"A shared pantry means neither kitchen can reorganize its shelves alone — the monolith returns through the pantry door."},
+    {q:"server.port=8082 in application.properties…",
+     options:["Opens a firewall rule","Sets the door number the embedded server listens on","Connects to the database","Sets a request timeout"],answer:1,
+     why:"Each kitchen needs its own door so both can be open on one machine (localhost:8081 and :8082)."},
+    {q:"billing-service is down and order-service calls it synchronously. What happens by default?",
+     options:["The call silently succeeds","order-service's request fails too — synchronous callers share their callee's fate","Kafka retries it","Spring queues it"],answer:1,
+     why:"Waiting on a dead phone line fails the whole order. This exact pain is why the ticket rail (Kafka) exists in Track 5."}
+  ]
+},
+{
+  id:"m13", track:"T4", trackName:"Camunda",
+  title:"Drawing the Checklist (BPMN)", minutes:25,
+  concepts:["BPMN","events","tasks","gateways"],
+  analogyBeat:"Meenakshi laminates her checklist",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 13</div>
+    <p>The new steward trainees keep improvising. One forgets the quality check. Another refunds an order twice. A third waits forever for a kitchen that already closed.</p>
+    <p>Meenakshi ends it with a single laminated card, drawn so simply anyone can follow it: a <b>circle</b> where the work starts, a <b>box</b> for each thing to do, a <b>diamond</b> where a decision is made, and a <b>thick circle</b> where the work ends. She pins one copy at the steward desk; the owner reads the same card and finally understands his own food court.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Four shapes are 90% of BPMN</h2>
+    <p>"Her laminated checklist says exactly what happens after payment, who to call, and what to do if a kitchen doesn't answer. The checklist is a drawing everyone — even the owner — can read." That drawing standard is <b>BPMN</b>:</p>
+    <table>
+      <tr><th>On the laminated card</th><th>In BPMN</th></tr>
+      <tr><td>Circle — "work starts here"</td><td><b>start event</b></td></tr>
+      <tr><td>Box — "do this thing"</td><td><b>task</b> (a <i>service task</i> when a kitchen/system does it)</td></tr>
+      <tr><td>Diamond — "decide, then take one path"</td><td><b>exclusive (XOR) gateway</b></td></tr>
+      <tr><td>Thick circle — "done"</td><td><b>end event</b></td></tr>
+      <tr><td>One card everyone reads</td><td>a diagram that is also <b>executable</b> — an engine can run it (next module!)</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 200" role="img" aria-label="BPMN order process: start, take payment, payment gateway, notify kitchen, quality check, end, with a cancel path">
+      <defs>
+        <marker id="a13S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+      </defs>
+      <style>
+        .bx13{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb13{font:600 10.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm13{font:10px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp13{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a13S)}
+      </style>
+      <circle cx="40" cy="80" r="16" fill="#FBF7F0" stroke="#1A1714" stroke-width="1.5"/>
+      <text class="sm13" x="14" y="115">order received</text>
+      <rect class="bx13" x="86" y="56" width="104" height="48" rx="8"/>
+      <text class="lb13" x="96" y="84">Take payment</text>
+      <path d="M240 56 L268 80 L240 104 L212 80 Z" fill="#FBF7F0" stroke="#1A1714" stroke-width="1.5"/>
+      <text class="sm13" x="216" y="44">paid?</text>
+      <rect class="bx13" x="300" y="56" width="110" height="48" rx="8"/>
+      <text class="lb13" x="310" y="78">Notify</text><text class="lb13" x="310" y="92">kitchen ⚙</text>
+      <rect class="bx13" x="440" y="56" width="110" height="48" rx="8"/>
+      <text class="lb13" x="450" y="78">Quality</text><text class="lb13" x="450" y="92">check</text>
+      <circle cx="600" cy="80" r="16" fill="#FBF7F0" stroke="#1A1714" stroke-width="3"/>
+      <text class="sm13" x="574" y="115">fulfilled</text>
+      <rect class="bx13" x="186" y="140" width="110" height="40" rx="8"/>
+      <text class="lb13" x="196" y="164">Cancel order</text>
+      <circle cx="350" cy="160" r="14" fill="#FBF7F0" stroke="#1A1714" stroke-width="3"/>
+      <path class="hp13" d="M56 80 H84"/>
+      <path class="hp13" d="M190 80 H210"/>
+      <path class="hp13" d="M268 80 H298"/><text class="sm13" x="272" y="72">yes</text>
+      <path class="hp13" d="M410 80 H438"/>
+      <path class="hp13" d="M550 80 H582"/>
+      <path class="hp13" d="M240 104 V138"/><text class="sm13" x="246" y="126">no</text>
+      <path class="hp13" d="M298 160 H334"/>
+    </svg>
+    <figcaption><b>Food court:</b> Meenakshi's card — take payment; if paid, notify the kitchen and quality-check; if not, cancel. Two thick circles: two honest endings.<br>
+    <b>Technical:</b> a BPMN process with a start event, tasks, an XOR gateway with labeled flows, and one end event per outcome. The ⚙ marks a service task a system will perform.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>No code — draw.</b> Download the free <b>Camunda Modeler</b> (camunda.com → Download → Modeler), unzip, run it, and create a <b>new BPMN diagram</b>.</p>
+      <div class="check">Draw exactly the card above: start event "Order received" → task "Take payment" → gateway "Payment OK?" → yes → service task "Notify kitchen" → task "Quality check" → end "Order fulfilled". Gateway's no-path → task "Cancel order" → end "Order cancelled".</div>
+      <div class="check">Name every element (click, type). An unnamed box is a trainee guessing again.</div>
+      <div class="check">Label the two gateway flows yes / no by clicking each arrow.</div>
+      <div class="check">Click empty canvas and set the process <b>id</b> to <code>order-fulfilment</code> — the engine finds it by this id next module.</div>
+      <div class="check">Save as <code>order-process.bpmn</code> somewhere you will find again. We deploy this exact file in m14.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Open your .bpmn file in a text editor (it is just XML), then paste this into Claude Code with the XML:</p>
+      <pre>Here is my BPMN 2.0 XML (pasted below). Review it like a strict process
+analyst: (1) exactly one start event? (2) does every path reach an end
+event? (3) are both gateway outgoing flows labeled? (4) do task names
+start with a verb? Then suggest ONE failure path I have not modeled —
+for example, what should happen if the kitchen never confirms — and
+show me which BPMN element would express it.
+
+[paste XML here]</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Every issue found maps to a concrete element in your diagram (you can point at it in the Modeler).</div>
+      <div class="check">You learned one new element from the failure-path suggestion (e.g., a timer boundary event).</div>
+      <div class="check">The diagram still opens cleanly in the Modeler after any fixes.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>the laminated card ends the guessing</b> — a process drawn in BPMN is one that everyone can read and an engine can run.</div>
+  </section>
+  <section class="next">Next: the card comes alive — Camunda 8 runs Order #42 through your drawing, for real.</section>
+  `,
+  quiz:[
+    {q:"The diamond shape in BPMN means…",
+     options:["Do a task","Wait for a message","Make a decision and take one outgoing path (XOR gateway)","End the process"],answer:2,
+     why:"The diamond is Meenakshi's 'paid?' moment — evaluate a condition, follow exactly one labeled arrow."},
+    {q:"Why does the cancel path get its own end event?",
+     options:["Decoration","Every distinct outcome should end explicitly — 'cancelled' and 'fulfilled' are different endings","BPMN requires two ends always","To use more shapes"],answer:1,
+     why:"Two thick circles = two honest endings. Anyone reading the card sees both ways an order can finish."},
+    {q:"What makes BPMN more than a pretty picture?",
+     options:["It exports to PowerPoint","The same diagram is executable — a process engine runs it step by step","It generates Java code","It replaces databases"],answer:1,
+     why:"That is Camunda's whole trick: the drawing everyone reads is the program the engine executes."}
+  ]
+},
+{
+  id:"m14", track:"T4", trackName:"Camunda",
+  title:"The Checklist Comes Alive", minutes:35,
+  concepts:["Camunda 8 Run","deploying BPMN","job workers","process instances","Operate"],
+  analogyBeat:"Meenakshi runs Order #42 through the checklist",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 14</div>
+    <p>Meenakshi's laminated card slides into a machine at the steward desk. Feed it <b>Order #42</b> and the machine lights up each step of the card in turn, never skipping, never guessing.</p>
+    <p>At "Notify kitchen" the machine does not cook. It rings a <b>bell tagged notify-kitchen</b>. Whichever worker signed up for that bell does the job and reports back — only then does the light move on. On the wall, a screen shows exactly where every order sits on its card.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>The engine, the bell, the wall screen</h2>
+    <table>
+      <tr><th>At the steward desk</th><th>In Camunda 8</th></tr>
+      <tr><td>The machine that reads cards</td><td>the <b>process engine</b> (Zeebe, started by Camunda 8 Run)</td></tr>
+      <tr><td>Sliding a card into the machine</td><td><b>deploying</b> the BPMN file</td></tr>
+      <tr><td>Order #42 travelling its card</td><td>a <b>process instance</b> (with variables like orderId)</td></tr>
+      <tr><td>A bell tagged with a chore</td><td>a <b>job</b> of a given <b>task type</b> (notify-kitchen)</td></tr>
+      <tr><td>The worker who signed up for that bell</td><td>a <b>job worker</b> — your code, any language</td></tr>
+      <tr><td>The wall screen</td><td><b>Operate</b> — see every instance's position live</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Modeler deploys BPMN to Zeebe; a Node job worker completes notify-kitchen jobs; Operate shows instances">
+      <defs>
+        <marker id="a14S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a14G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx14{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb14{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm14{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp14{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a14S)}
+        .ev14{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a14G)}
+      </style>
+      <rect class="bx14" x="20" y="20" width="170" height="56" rx="8"/>
+      <text class="lb14" x="34" y="42">Camunda Modeler</text>
+      <text class="sm14" x="34" y="60">order-process.bpmn</text>
+      <rect class="bx14" x="250" y="90" width="180" height="66" rx="8"/>
+      <text class="lb14" x="264" y="112">Zeebe engine</text>
+      <text class="sm14" x="264" y="129">Camunda 8 Run · :26500</text>
+      <text class="sm14" x="264" y="145">Order #42 = instance</text>
+      <rect class="bx14" x="470" y="20" width="150" height="56" rx="8"/>
+      <text class="lb14" x="484" y="42">Operate 📺</text>
+      <text class="sm14" x="484" y="60">localhost:8080</text>
+      <rect class="bx14" x="470" y="170" width="160" height="56" rx="8"/>
+      <text class="lb14" x="484" y="192">worker.js (Node)</text>
+      <text class="sm14" x="484" y="210">bell: notify-kitchen</text>
+      <path class="hp14" d="M120 76 C 130 100 200 100 248 108"/>
+      <text class="sm14" x="120" y="102">deploy</text>
+      <path class="ev14" d="M432 110 C 460 100 455 55 468 48"/>
+      <text class="sm14" x="440" y="76">watch</text>
+      <path class="ev14" d="M432 140 C 460 150 455 190 468 196"/>
+      <text class="sm14" x="420" y="172">poll job → complete</text>
+    </svg>
+    <figcaption><b>Food court:</b> the card goes into the machine; the wall screen shows Order #42's light; the notify-kitchen bell rings and a worker answers it.<br>
+    <b>Technical:</b> the Modeler deploys BPMN to Zeebe; Operate visualizes instances; a Node job worker polls for notify-kitchen jobs and completes them, advancing the instance.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>1 · Start the machine.</b> Download <b>Camunda 8 Run</b> (camunda.com → Download → Self-Managed → Camunda 8 Run — a ~1.2 GB zip), unzip it onto a drive with <b>at least 4 GB free</b> (Zeebe refuses to work on a nearly-full disk), then in that folder:</p>
+      <pre>.\c8run.exe start
+# engine (Zeebe) on :26500 · Operate UI on http://localhost:8080
+# first start takes 1–2 minutes — wait for the browser tab it opens</pre>
+      <p><b>2 · Make the bell ring-able.</b> In the Modeler, open <code>order-process.bpmn</code>, click "Notify kitchen", and in the properties panel set Task type = <code>notify-kitchen</code> (this is what the ⚙ box needs). Then <b>Deploy</b> (rocket icon) → Camunda 8 Self-Managed → address <code>localhost:26500</code>. (No Modeler handy? <code>labs/t4-camunda/steward-worker/deploy-and-start.js</code> deploys and starts an instance from the command line.)</p>
+      <p><b>3 · Feed in Order #42.</b> Modeler's play icon → Start instance with variables:</p>
+      <pre>{ "orderId": 42 }</pre>
+      <p>Open Operate: your instance is <b>waiting</b> at Notify kitchen — the bell is ringing and nobody has signed up.</p>
+      <p><b>4 · Sign up for the bell.</b> In a clean folder:</p>
+      <pre>mkdir steward-worker
+cd steward-worker
+npm init -y
+npm install @camunda8/sdk</pre>
+      <p><code>worker.js</code>:</p>
+      <pre>process.env.ZEEBE_ADDRESS = 'localhost:26500';
+process.env.CAMUNDA_SECURE_CONNECTION = 'false';
+process.env.CAMUNDA_OAUTH_DISABLED = 'true';
+
+const { Camunda8 } = require('@camunda8/sdk');
+const zeebe = new Camunda8().getZeebeGrpcApiClient();
+
+zeebe.createWorker({
+  taskType: 'notify-kitchen',
+  taskHandler: (job) => {
+    console.log('🔔 Bell! Notifying kitchen for order', job.variables.orderId);
+    return job.complete();
+  },
+});
+console.log('Steward worker listening for notify-kitchen jobs...');</pre>
+      <pre>node worker.js</pre>
+      <div class="check">The worker logs the bell for order 42 within seconds — it grabbed the waiting job.</div>
+      <div class="check">Refresh Operate: the token moved past Notify kitchen. Complete any user tasks and watch it reach the end event.</div>
+      <div class="check">Start three more instances from the Modeler with different orderIds — the worker handles them all; the wall screen shows each one's position.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I have Camunda 8 Run started locally (Zeebe gRPC on localhost:26500, no
+auth) and a deployed BPMN process with id order-fulfilment containing a
+service task with task type notify-kitchen. Write a Node script using
+@camunda8/sdk that does two things: (1) starts a process instance with
+variables { orderId: 42, item: "Hyderabadi Biryani" }, and (2) runs a
+job worker for notify-kitchen that logs the variables and completes the
+job, adding a new variable notifiedAt with the current time. Explain
+what would happen if I ran TWO copies of this worker at once.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">Running the script starts an instance AND completes its notify-kitchen job (visible in Operate).</div>
+      <div class="check">The notifiedAt variable appears on the instance in Operate.</div>
+      <div class="check">The two-workers answer mentions that each job goes to exactly one worker (no double-cooking).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>the checklist stopped being paper</b> — the engine walks Order #42 through it and rings bells; workers answer them.</div>
+  </section>
+  <section class="next">Next track: kitchens still phone each other for everything else. Time to install the ticket rail — Kafka.</section>
+  `,
+  quiz:[
+    {q:"A process instance is…",
+     options:["A copy of the BPMN file","One order (one execution) travelling through the deployed process, with its own variables","A Docker container","A job worker"],answer:1,
+     why:"The card is the process definition; Order #42 moving through it — with orderId 42 in its pocket — is an instance."},
+    {q:"How does a job worker get work?",
+     options:["The engine calls the worker's HTTP endpoint","The worker subscribes to a task type, polls for jobs, does the work, and reports completion","Workers read the BPMN file directly","Via email"],answer:1,
+     why:"You sign up for the bell: the worker asks Zeebe for notify-kitchen jobs, handles them, and calls complete()."},
+    {q:"The instance sits at 'Notify kitchen' and nothing happens. Most likely…",
+     options:["The BPMN is corrupt","No worker is running for that task type — the bell rings unanswered","Operate is down","The variables are too big"],answer:1,
+     why:"An engine can wait days at a service task. Start a worker for the task type and the token moves within seconds."}
+  ]
+},
+{
+  id:"m15", track:"T5", trackName:"Kafka",
+  title:"The Ticket Rail", minutes:20,
+  concepts:["topics","producers & consumers","partitions","retention"],
+  analogyBeat:"Kitchens stop phoning; tickets go on the rail",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 15</div>
+    <p>The lunch rush breaks the phones. Billing calls the Biryani Kitchen — line busy. Calls again — the juice melts while everyone waits on hold. You felt this exact failure in m12.</p>
+    <p>The fix is hardware: a steel <b>ticket rail</b> above the pass. Anyone pins a ticket. Anyone who cares reads the rail <i>when they are ready</i>. And here is the strange, wonderful part: <b>tickets stay on the rail after being read</b> — a trainee who starts at 2 p.m. can replay the whole morning.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Pin, don't phone</h2>
+    <p>"Kitchens don't shout at each other. They pin tickets on the rail. Nobody waits on the phone." The rail is <b>Kafka</b>:</p>
+    <table>
+      <tr><th>Above the pass</th><th>In Kafka</th></tr>
+      <tr><td>The steel rail itself</td><td>the <b>broker</b> — the server that stores and serves events</td></tr>
+      <tr><td>A named section of rail ("paid orders")</td><td>a <b>topic</b> (order.paid)</td></tr>
+      <tr><td>Pinning a ticket</td><td><b>producing</b> a message</td></tr>
+      <tr><td>Reading at your own pace</td><td><b>consuming</b> — each reader tracks its own place (offset)</td></tr>
+      <tr><td>Several parallel rails per section</td><td><b>partitions</b> — parallelism within a topic</td></tr>
+      <tr><td>Tickets staying up after being read</td><td><b>retention</b> — messages persist for a configured time, read or not</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 230" role="img" aria-label="Producer pins messages onto a Kafka topic on the rail; two consumers read at their own offsets; messages are retained">
+      <defs>
+        <marker id="a15G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx15{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb15{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm15{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .ev15{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a15G)}
+        .tk{fill:#fff;stroke:#2E6E63;stroke-width:1.5}
+      </style>
+      <rect class="bx15" x="20" y="90" width="140" height="52" rx="8"/>
+      <text class="lb15" x="34" y="112">Billing Room</text><text class="sm15" x="34" y="128">producer</text>
+      <rect class="bx15" x="210" y="70" width="250" height="90" rx="8"/>
+      <text class="sm15" x="224" y="88">topic: order.paid (the rail)</text>
+      <rect class="tk" x="224" y="98" width="52" height="40" rx="4"/><text class="sm15" x="230" y="122">#40</text>
+      <rect class="tk" x="284" y="98" width="52" height="40" rx="4"/><text class="sm15" x="290" y="122">#41</text>
+      <rect class="tk" x="344" y="98" width="52" height="40" rx="4"/><text class="sm15" x="350" y="122">#42</text>
+      <text class="sm15" x="404" y="122">…stay ✓</text>
+      <rect class="bx15" x="500" y="30" width="130" height="52" rx="8"/>
+      <text class="lb15" x="512" y="52">Biryani K.</text><text class="sm15" x="512" y="68">reading at #42</text>
+      <rect class="bx15" x="500" y="150" width="130" height="52" rx="8"/>
+      <text class="lb15" x="512" y="172">Trainee 🧢</text><text class="sm15" x="512" y="188">replaying from #40</text>
+      <path class="ev15" d="M162 116 H208"/>
+      <text class="sm15" x="166" y="106">pin</text>
+      <path class="ev15" d="M462 96 C 480 90 482 62 498 58"/>
+      <path class="ev15" d="M462 136 C 480 142 482 170 498 174"/>
+    </svg>
+    <figcaption><b>Food court:</b> Billing pins tickets and walks away; the kitchen reads the newest, while the trainee replays the morning from ticket #40 — the rail keeps them all.<br>
+    <b>Technical:</b> a producer appends to the topic; each consumer reads at its own offset; retention keeps messages available for reread and replay.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Install the rail</b> — one prefab unit (remember m02?). In a clean folder, <code>docker-compose.yml</code>:</p>
+      <pre>services:
+  rail:
+    image: apache/kafka:3.9.0
+    container_name: rail
+    ports:
+      - "9092:9092"</pre>
+      <pre>docker compose up -d</pre>
+      <p><b>Pin tickets</b> — a console producer (each line you type = one ticket):</p>
+      <pre>docker exec -it rail /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic order.paid</pre>
+      <p>Type <code>PAID-42</code>, Enter, <code>PAID-43</code>, Enter. Leave it open.</p>
+      <p><b>Read the rail</b> — a second terminal, a console consumer:</p>
+      <pre>docker exec -it rail /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order.paid --from-beginning</pre>
+      <div class="check">The consumer prints PAID-42 and PAID-43 — even though it started AFTER they were pinned. That is retention.</div>
+      <div class="check">Type PAID-44 in the producer: it appears in the consumer almost instantly.</div>
+      <div class="check">Ctrl+C the consumer, run it again with --from-beginning: all three tickets replay. Reading never removes a ticket.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I have a single-node Kafka broker (apache/kafka image, container name
+rail) on localhost:9092 via Docker. Using docker exec and the CLI tools
+in /opt/kafka/bin, show me how to: (1) create a topic order.paid with 3
+partitions, (2) describe it, (3) produce 6 messages with keys order-1,
+order-2, order-3 (key:value syntax), and (4) prove that messages with
+the same key always land in the same partition. Explain in two
+sentences why same-key-same-partition matters for keeping one order's
+events in order.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">The topic exists with 3 partitions (shown by the describe command).</div>
+      <div class="check">You can show which partition each key landed in, and repeated keys repeat their partition.</div>
+      <div class="check">The ordering explanation mentions per-partition ordering (Kafka's guarantee).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>tickets pinned on the rail wait for whoever needs them, for as long as needed</b> — that is a topic with retention.</div>
+  </section>
+  <section class="next">Next: real code pins and grabs the tickets — Spring Boot produces, NestJS consumes.</section>
+  `,
+  quiz:[
+    {q:"A Kafka topic is…",
+     options:["A chat room that deletes messages once read","A named, append-only log of messages that consumers read at their own pace","A database table with rows you update","A queue where each message vanishes after one read"],answer:1,
+     why:"A named section of rail: producers append tickets, consumers read at their own offset, tickets remain."},
+    {q:"A consumer was offline for an hour. The messages produced meanwhile are…",
+     options:["Lost forever","Still on the topic — the consumer resumes from its last offset and catches up","Returned to the producer","Duplicated"],answer:1,
+     why:"Retention keeps tickets on the rail; the reader picks up exactly where it left off. No melted juice."},
+    {q:"The producer and consumer in your lab never knew about each other. That property is called…",
+     options:["Latency","Decoupling — they share only the topic, not schedules or addresses","Replication","Sharding"],answer:1,
+     why:"Pin and walk away: Billing needs no phone book of kitchens, and new readers can appear tomorrow unannounced."}
+  ]
+},
+{
+  id:"m16", track:"T5", trackName:"Kafka",
+  title:"Kitchens That Listen", minutes:30,
+  concepts:["Spring Kafka producer","kafkajs consumer","consumer groups","event-driven services"],
+  analogyBeat:"Billing pins PAID-#42; the Biryani Kitchen grabs it",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 16</div>
+    <p>The Billing Room finishes charging Order #42. Nobody picks up a phone. A clerk pins <b>PAID-#42</b> on the rail and turns back to the till.</p>
+    <p>Across the pass, the Biryani Kitchen keeps a crew of <b>runners</b> who share one job: watch the rail, grab paid tickets, fire the stove. Exactly one runner takes each ticket — no dish gets cooked twice — and if a runner is on break, another grabs it. Billing neither knows nor cares.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Mapping</div>
+    <h2>Fire-and-forget, grab-as-a-crew</h2>
+    <table>
+      <tr><th>Above the pass</th><th>In your code</th></tr>
+      <tr><td>Pinning without waiting</td><td><b>producing</b> — KafkaTemplate.send() returns immediately</td></tr>
+      <tr><td>The runner crew sharing one job</td><td>a <b>consumer group</b> (groupId: biryani-kitchen)</td></tr>
+      <tr><td>Exactly one runner per ticket</td><td>partitions are divided among a group's members</td></tr>
+      <tr><td>A second, separate crew reading the same rail</td><td>another consumer group — each group gets ALL messages</td></tr>
+    </table>
+    <p>Note what m12's pain becomes: Billing no longer fails when the kitchen is down. The ticket waits; the kitchen catches up.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 200" role="img" aria-label="Spring Boot billing service produces to topic order.paid; NestJS consumer in group biryani-kitchen consumes">
+      <defs>
+        <marker id="a16G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx16{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb16{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm16{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .ev16{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a16G)}
+      </style>
+      <rect class="bx16" x="20" y="70" width="180" height="62" rx="8"/>
+      <text class="lb16" x="34" y="92">billing-service :8082</text>
+      <text class="sm16" x="34" y="108">Spring Boot · KafkaTemplate</text>
+      <text class="sm16" x="34" y="122">.send("order.paid", ...)</text>
+      <rect class="bx16" x="250" y="76" width="150" height="50" rx="8"/>
+      <text class="lb16" x="264" y="98">order.paid</text>
+      <text class="sm16" x="264" y="114">topic on the rail</text>
+      <rect class="bx16" x="450" y="70" width="180" height="62" rx="8"/>
+      <text class="lb16" x="464" y="92">kiosk-7 :3000</text>
+      <text class="sm16" x="464" y="108">NestJS · kafkajs consumer</text>
+      <text class="sm16" x="464" y="122">group: biryani-kitchen</text>
+      <path class="ev16" d="M202 100 H248"/>
+      <text class="sm16" x="206" y="90">pin</text>
+      <path class="ev16" d="M402 100 H448"/>
+      <text class="sm16" x="406" y="90">grab</text>
+      <text class="sm16" x="200" y="170">no HTTP between them — billing works even when the consumer is down</text>
+    </svg>
+    <figcaption><b>Food court:</b> Billing pins PAID-#42 and returns to the till; the kitchen's runner grabs it when ready.<br>
+    <b>Technical:</b> Spring Boot produces to order.paid; a kafkajs consumer in group biryani-kitchen receives it — the services share a topic, not a connection.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p>Kafka from m15 must be running (<code>docker compose up -d</code>).</p>
+      <p><b>Teach Billing to pin.</b> In billing-service (m12), add to <code>pom.xml</code>:</p>
+      <pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+      <p><code>application.properties</code>: <code>spring.kafka.bootstrap-servers=localhost:9092</code>. Then pin the ticket right where the bill is paid:</p>
+      <pre>@RestController
+public class BillingController {
+  private final KafkaTemplate&lt;String, String&gt; rail;
+  public BillingController(KafkaTemplate&lt;String, String&gt; rail) { this.rail = rail; }
+
+  @PostMapping("/bills")
+  public String charge(@RequestParam Long orderId) {
+    rail.send("order.paid", orderId.toString(), "PAID-" + orderId);  // pin &amp; go
+    return "PAID-" + orderId;
+  }
+}</pre>
+      <p><b>Teach the kitchen to listen.</b> In kiosk-7: <code>npm install kafkajs</code>, then a provider <code>rail.consumer.ts</code>:</p>
+      <pre>import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Kafka } from 'kafkajs';
+
+@Injectable()
+export class RailConsumer implements OnModuleInit {
+  async onModuleInit() {
+    const kafka = new Kafka({ clientId: 'kiosk-7', brokers: ['localhost:9092'] });
+    const consumer = kafka.consumer({ groupId: 'biryani-kitchen' });
+    await consumer.connect();
+    await consumer.subscribe({ topic: 'order.paid', fromBeginning: true });
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        console.log('🎟 Ticket grabbed:', message.value.toString());
+      },
+    });
+  }
+}</pre>
+      <p>Add <code>RailConsumer</code> to the module's providers. Start Kafka <i>first</i>, then both apps — the consumer connects once, at startup (if the kiosk was already running before the rail existed, restart it). Then pay a bill:</p>
+      <pre>Invoke-RestMethod -Method Post -Uri "http://localhost:8082/bills?orderId=42"</pre>
+      <div class="check">The kiosk console prints "Ticket grabbed: PAID-42" — Java pinned, TypeScript grabbed, no HTTP between them.</div>
+      <div class="check">Stop kiosk-7, pay orders 43 and 44, restart kiosk-7: both tickets arrive on startup. The m12 failure is gone.</div>
+      <div class="check">Say the m12 → m16 difference in one sentence. (Then: billing died with the kitchen; now: billing never notices.)</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code:</p>
+      <pre>I have Kafka on localhost:9092 (Docker), a Spring Boot billing-service
+on 8082, and a NestJS app kiosk-7. Wire an event flow: when POST /bills
+is called on billing-service, produce a JSON message
+{ "orderId": N, "status": "PAID", "total": 180 } to topic order.paid
+using spring-kafka (key = orderId). In kiosk-7, add a kafkajs consumer
+(group biryani-kitchen) that parses the JSON and keeps an in-memory map
+of orderId → status, exposed at GET /orders/:id/status. Show me an
+end-to-end test: pay a bill, then read the status from the kiosk.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">POST /bills on 8082 leads (asynchronously) to the correct status at GET /orders/42/status on 3000.</div>
+      <div class="check">Messages are keyed by orderId and the value is valid JSON, parsed on the consumer side.</div>
+      <div class="check">Stopping the consumer during a payment loses nothing — it catches up on restart.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>Billing pins and walks away while the kitchen's runners grab tickets when ready</b> — services that never phone each other.</div>
+  </section>
+  <section class="next">Next track: everything at once. Order #42 travels the whole food court, end to end.</section>
+  `,
+  quiz:[
+    {q:"Two consumers share groupId biryani-kitchen. A message arrives on order.paid. Who processes it?",
+     options:["Both of them","Exactly one of them — the group divides the partitions","Neither","The producer decides"],answer:1,
+     why:"One runner per ticket within a crew: a consumer group load-balances, so no dish is cooked twice."},
+    {q:"A second team starts a consumer with groupId analytics on the same topic. It receives…",
+     options:["Nothing — the kitchen group ate the messages","Every message, independently of the kitchen group","Only new keys","Every second message"],answer:1,
+     why:"Each GROUP gets the full stream at its own pace. Separate crews read the same rail without interfering."},
+    {q:"In m12 a dead billing-service failed the order. In this module a dead consumer means…",
+     options:["The producer blocks until it returns","Messages wait on the topic; the consumer processes them after restarting","Data loss","Kafka restarts the consumer"],answer:1,
+     why:"The ticket rail absorbs downtime: pin now, grab later. That asymmetry is the whole point of events."}
+  ]
+},
+{
+  id:"m17", track:"T6", trackName:"Capstone",
+  title:"Order #42, End to End", minutes:45,
+  concepts:["end-to-end flow","correlation ID","sync vs async","full-stack wiring"],
+  analogyBeat:"Anu taps Order; we follow the token through every hand",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 17</div>
+    <p>Friday, 7 p.m. Anu taps <b>once</b>. For the next ninety seconds, every character you have met touches Order #42 exactly once — and you know what every single one of them is.</p>
+    <p>Follow the token.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">The Timeline — character AND technology at every step</div>
+    <h2>Ninety seconds in the life of Order #42</h2>
+    <ol>
+      <li><b>Anu</b> taps Order on the <b>Biryani Counter</b> — the Angular MFE that <b>Farid</b> (single-spa) mounted at /biryani.</li>
+      <li>The counter sends one request to <b>Kiosk-7</b> — POST /orders to the NestJS BFF.</li>
+      <li>Kiosk-7 hands the slip to <b>Meenakshi</b> — the BFF starts a Camunda process instance of order-fulfilment with variable orderId: 42.</li>
+      <li>Meenakshi's first box says take payment — a job worker calls the <b>Billing Room</b>, the Spring Boot billing-service.</li>
+      <li>The Billing Room pins <b>PAID-42</b> on the <b>ticket rail</b> — Spring Boot produces to Kafka topic order.paid, keyed by orderId.</li>
+      <li>The <b>Biryani Kitchen</b>'s runner grabs the ticket — a consumer in group biryani-kitchen fires the stove, and when the dish is done it pins order.ready.</li>
+      <li>Kiosk-7's own runner sees <b>order.ready</b> — its kafkajs consumer updates the status it serves at GET /orders/42/status.</li>
+      <li><b>Anu</b>'s screen flips to "Ready — collect at Counter 3" — the Angular app polls the BFF and re-renders.</li>
+    </ol>
+    <p>One number — <b>42</b> — rode through every hand. That is a <b>correlation ID</b>: the order token that lets you trace one customer's journey across six technologies.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Diagram</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 330" role="img" aria-label="Numbered end-to-end flow of order 42 through single-spa, NestJS, Camunda, Spring Boot services and Kafka">
+      <defs>
+        <marker id="a17S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a17G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx17{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb17{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm17{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp17{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a17S)}
+        .ev17{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a17G)}
+        .num{font:700 11px "JetBrains Mono",monospace;fill:#C4531F}
+      </style>
+      <rect class="bx17" x="20" y="20" width="150" height="50" rx="8"/>
+      <text class="lb17" x="34" y="40">Anu 👤 ①⑧</text><text class="sm17" x="34" y="56">Biryani MFE (single-spa)</text>
+      <rect class="bx17" x="240" y="20" width="160" height="50" rx="8"/>
+      <text class="lb17" x="254" y="40">Kiosk-7 ②⑦</text><text class="sm17" x="254" y="56">NestJS BFF :3000</text>
+      <rect class="bx17" x="460" y="20" width="160" height="50" rx="8"/>
+      <text class="lb17" x="474" y="40">Meenakshi ③</text><text class="sm17" x="474" y="56">Camunda instance #42</text>
+      <rect class="bx17" x="460" y="120" width="160" height="50" rx="8"/>
+      <text class="lb17" x="474" y="140">Billing Room ④⑤</text><text class="sm17" x="474" y="156">Spring Boot :8082</text>
+      <rect class="bx17" x="240" y="120" width="160" height="50" rx="8"/>
+      <text class="lb17" x="254" y="140">Biryani Kitchen ⑥</text><text class="sm17" x="254" y="156">consumer + stove</text>
+      <rect class="bx17" x="20" y="240" width="600" height="50" rx="8"/>
+      <text class="lb17" x="220" y="262">The Ticket Rail (Kafka)</text>
+      <text class="sm17" x="180" y="278">order.paid · order.ready — every ticket keyed by 42</text>
+      <path class="hp17" d="M172 45 H238"/><text class="num" x="196" y="38">1→2</text>
+      <path class="hp17" d="M402 45 H458"/><text class="num" x="420" y="38">3</text>
+      <path class="hp17" d="M540 72 V118"/><text class="num" x="548" y="98">4</text>
+      <path class="ev17" d="M540 172 V238"/><text class="num" x="548" y="210">5 pin</text>
+      <path class="ev17" d="M320 238 V172"/><text class="num" x="328" y="210">6 grab</text>
+      <path class="ev17" d="M300 238 C 300 200 300 90 300 74"/>
+      <text class="num" x="252" y="200">7 ready</text>
+      <path class="hp17" d="M240 36 C 210 36 200 36 172 36" opacity="0.8"/><text class="num" x="196" y="28">8</text>
+    </svg>
+    <figcaption><b>Food court:</b> Anu taps once ①; the kiosk logs it ② and hands it to Meenakshi ③, who has billing charge it ④; Billing pins PAID ⑤; the kitchen grabs it, cooks, pins READY ⑥; the kiosk sees it ⑦ and Anu's screen flips ⑧.<br>
+    <b>Technical:</b> solid orange = synchronous HTTP (steps 1–4 wait for answers); dashed green = asynchronous Kafka events (steps 5–7 pin and move on). The orderId 42 correlates every hop.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>Guided assembly.</b> You built every part in m06–m16; today you only add two pieces of glue and run everything at once. Startup order matters — infrastructure first:</p>
+      <pre># 1. the rail            docker compose up -d        (m15 folder)
+# 2. the steward desk    ./c8run start                (m14 folder)
+# 3. billing-service     ./mvnw spring-boot:run       (:8082, m16 version)
+# 4. kiosk-7             npm run start:dev            (:3000, with RailConsumer)
+# 5. the counters        root config + MFEs           (:9000, m06)
+# 6. the steward worker  node worker.js               (m14 folder)</pre>
+      <p><b>Glue #1</b> — Kiosk-7 hands orders to Meenakshi. In OrdersService (m08), after storing the order, start the process (same env vars as m14's worker):</p>
+      <pre>const { Camunda8 } = require('@camunda8/sdk');
+const zeebe = new Camunda8().getZeebeGrpcApiClient();
+
+await zeebe.createProcessInstance({
+  bpmnProcessId: 'order-fulfilment',
+  variables: { orderId: order.id },
+});</pre>
+      <p><b>Glue #2</b> — the worker's notify-kitchen handler should now do something real: call billing (or produce the event), exactly as you wired in m16.</p>
+      <div class="check">POST an order at the counter (or directly to :3000/orders) and watch the cascade: Operate shows instance moving; billing logs the charge; the kiosk logs "Ticket grabbed".</div>
+      <div class="check">Trace orderId 42 in every window — one correlation ID across six terminals.</div>
+      <div class="check">Kill the kitchen consumer mid-flow, order again, restart it: the order completes late but completes. Say which hops are sync (1–4) and which are async (5–7), and why the async ones survived.</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code (run it from a folder containing your course projects):</p>
+      <pre>I have these working projects from a course: a single-spa root config
+with two Angular MFEs (:9000), a NestJS BFF kiosk-7 (:3000) with a
+kafkajs consumer, Spring Boot billing-service (:8082) producing to Kafka
+topic order.paid, Kafka on :9092 (Docker), and Camunda 8 Run
+(Zeebe :26500) with a deployed process order-fulfilment that has a
+service task notify-kitchen. Wire the missing glue for an end-to-end
+flow: (1) kiosk-7's POST /orders should start a Camunda process instance
+with the orderId, (2) the notify-kitchen job worker should call billing,
+(3) after consuming order.paid, kiosk-7 should update an order-status
+map served at GET /orders/:id/status. Then give me a numbered smoke-test
+script to demonstrate the full flow for one order, and a diagram in text
+of what happens where.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">One POST /orders eventually flips GET /orders/:id/status to PAID with no manual steps between.</div>
+      <div class="check">Operate shows a completed process instance for that orderId.</div>
+      <div class="check">The smoke test names which step is synchronous and which is event-driven.</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>one tap became a request, a checklist, a charge, and two tickets</b> — and every hand that touched Order #42 could fail without closing the building.</div>
+  </section>
+  <section class="next">Next: one last look from the balcony — the map on the wall, and where you go from here.</section>
+  `,
+  quiz:[
+    {q:"Which hops in the Order #42 timeline are synchronous, and which are events?",
+     options:["All synchronous","Counter→kiosk→Camunda→billing are HTTP (waiting); PAID and READY travel as Kafka events (pinned)","All events","Only the browser call is HTTP"],answer:1,
+     why:"Solid orange arrows wait for answers (steps 1–4); dashed green tickets are pinned and walked away from (5–7)."},
+    {q:"The number 42 appearing in the MFE, the BFF, Camunda variables, and Kafka keys is…",
+     options:["A coincidence","A correlation ID — one token to trace a single order across every system","A partition number","A port"],answer:1,
+     why:"The order token: whatever logs or screens you open, #42 identifies the same customer journey."},
+    {q:"The kitchen consumer was dead when PAID-42 was pinned. The order…",
+     options:["Is lost","Completes late: the ticket waited on the rail and the consumer processed it after restarting","Must be re-placed","Errors in the browser"],answer:1,
+     why:"Retention plus consumer offsets = downtime becomes delay, not loss. This is the resilience the monolith never had."}
+  ]
+},
+{
+  id:"m18", track:"T6", trackName:"Capstone",
+  title:"The Map on the Wall", minutes:15,
+  concepts:["architecture recap","when to use what","honest trade-offs","next steps"],
+  analogyBeat:"Anu leaves full and happy; Farid pins the floor map",
+  html:`
+  <section class="analogy">
+    <div class="eyebrow">The Food Court · Beat 18 — Closing Time</div>
+    <p>Ten p.m. Anu, full and happy, stops at the exit where Farid is pinning a framed <b>floor map</b> to the wall. "Everything you ate tonight," he says, "was six independent decisions cooperating."</p>
+    <p>Anu takes a photo of the map. So should you.</p>
+  </section>
+
+  <section class="concept">
+    <div class="eyebrow">When to Use What — the honest version</div>
+    <h2>Six decisions, not one package deal</h2>
+    <table>
+      <tr><th>You need…</th><th>Reach for…</th></tr>
+      <tr><td>Independent UI teams shipping on their own schedules</td><td>microfrontends (<b>single-spa</b>) — otherwise one Angular app is simpler and better</td></tr>
+      <tr><td>One frontend-shaped API over many services</td><td>a BFF (<b>NestJS</b>)</td></tr>
+      <tr><td>Business capabilities that scale and deploy separately, each owning its data</td><td>microservices (<b>Spring Boot</b>) — otherwise start with a well-organized monolith</td></tr>
+      <tr><td>A long-running business flow people must see, audit, and change</td><td><b>Camunda</b> / BPMN</td></tr>
+      <tr><td>Decoupled communication, replay, and surviving downtime</td><td><b>Kafka</b> events — otherwise plain HTTP is honest work</td></tr>
+    </table>
+    <p>The food court beats the single restaurant <i>only when the crowd is big enough</i>. Every stall you add costs coordination — Farid, Kiosk-7, Meenakshi, and the rail are all overhead a small café does not need. Knowing when NOT to use these tools is the real graduation.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">The Poster — print me</div>
+    <figure class="diagram">
+    <svg viewBox="0 0 640 360" role="img" aria-label="Full architecture poster: browser, single-spa MFEs, NestJS BFF, Camunda, Spring Boot services, and Kafka, with sync and async arrow legend">
+      <defs>
+        <marker id="a18S" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#C4531F"/></marker>
+        <marker id="a18G" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#2E6E63"/></marker>
+      </defs>
+      <style>
+        .bx18{fill:#FBF7F0;stroke:#1A1714;stroke-width:1.5}
+        .lb18{font:600 11.5px "JetBrains Mono",monospace;fill:#1A1714}
+        .sm18{font:10.5px "JetBrains Mono",monospace;fill:#6b625a}
+        .hp18{stroke:#C4531F;stroke-width:1.6;fill:none;marker-end:url(#a18S)}
+        .ev18{stroke:#2E6E63;stroke-width:1.6;stroke-dasharray:5 4;fill:none;marker-end:url(#a18G)}
+        .zone{font:700 10px "JetBrains Mono",monospace;fill:#C4531F;letter-spacing:.08em}
+      </style>
+      <text class="zone" x="20" y="16">UI — THE COUNTERS</text>
+      <rect class="bx18" x="20" y="24" width="130" height="44" rx="8"/>
+      <text class="lb18" x="32" y="44">Anu 👤</text><text class="sm18" x="32" y="58">browser</text>
+      <rect class="bx18" x="190" y="24" width="200" height="44" rx="8"/>
+      <text class="lb18" x="202" y="44">Farid — single-spa</text>
+      <text class="sm18" x="202" y="58">Biryani MFE · Dosa MFE (Angular)</text>
+      <text class="zone" x="440" y="16">GATEWAY</text>
+      <rect class="bx18" x="440" y="24" width="180" height="44" rx="8"/>
+      <text class="lb18" x="452" y="44">Kiosk-7 — NestJS BFF</text>
+      <text class="sm18" x="452" y="58">one order, one receipt</text>
+      <text class="zone" x="440" y="102">WORKFLOW</text>
+      <rect class="bx18" x="440" y="110" width="180" height="44" rx="8"/>
+      <text class="lb18" x="452" y="130">Meenakshi — Camunda</text>
+      <text class="sm18" x="452" y="144">BPMN checklist, executed</text>
+      <text class="zone" x="20" y="102">SERVICES — THE KITCHENS</text>
+      <rect class="bx18" x="20" y="110" width="180" height="44" rx="8"/>
+      <text class="lb18" x="32" y="130">Biryani Kitchen</text><text class="sm18" x="32" y="144">Spring Boot + own DB</text>
+      <rect class="bx18" x="220" y="110" width="170" height="44" rx="8"/>
+      <text class="lb18" x="232" y="130">Billing Room</text><text class="sm18" x="232" y="144">Spring Boot + own DB</text>
+      <text class="zone" x="20" y="204">EVENTS — THE TICKET RAIL</text>
+      <rect class="bx18" x="20" y="212" width="600" height="46" rx="8"/>
+      <text class="lb18" x="230" y="232">Kafka — topics: order.paid · order.ready</text>
+      <text class="sm18" x="230" y="248">pinned, retained, replayable</text>
+      <path class="hp18" d="M152 46 H188"/>
+      <path class="hp18" d="M392 46 H438"/>
+      <path class="hp18" d="M530 70 V108"/>
+      <path class="hp18" d="M438 132 H392"/>
+      <path class="ev18" d="M305 156 V210"/>
+      <path class="ev18" d="M110 210 V156"/>
+      <rect class="bx18" x="20" y="290" width="600" height="52" rx="8"/>
+      <text class="sm18" x="36" y="312">legend:</text>
+      <path class="hp18" d="M110 308 H170"/><text class="sm18" x="180" y="312">HTTP — waits for an answer</text>
+      <path class="ev18" d="M400 308 H460"/><text class="sm18" x="470" y="312">event — pin &amp; move on</text>
+      <text class="sm18" x="36" y="332">one story: Anu → Farid → Kiosk-7 → Meenakshi → kitchens → the rail → back to Anu</text>
+    </svg>
+    <figcaption><b>Food court:</b> the whole floor on one card — customer, floor manager, kiosk, steward, kitchens, and the rail that ties them together.<br>
+    <b>Technical:</b> UI layer (Angular MFEs under single-spa), a NestJS BFF, a Camunda workflow engine, Spring Boot services with private databases, and Kafka carrying events between them.</figcaption>
+    </figure>
+  </section>
+
+  <section class="lab">
+    <div class="tabs">
+      <button class="on" data-pane="u">Understand It</button>
+      <button data-pane="b">Build It with AI</button>
+    </div>
+    <div class="pane on" data-pane="u">
+      <p><b>The two-minute tour.</b> Screenshot or print the poster, then give the tour twice — out loud, to a person or a rubber duck:</p>
+      <div class="check">Story pass: "Anu orders… Farid shows… Kiosk-7 forwards… Meenakshi checks… Billing pins… the Kitchen grabs…" — under two minutes, no notes.</div>
+      <div class="check">Tech pass: the same tour with only technical terms — browser, single-spa, NestJS BFF, Camunda process, Kafka producer, consumer group.</div>
+      <div class="check">Trade-off pass: name one situation where you would use NONE of this (a small team, a small app: one framework, one server, one database — and that is good engineering too).</div>
+    </div>
+    <div class="pane" data-pane="b">
+      <p>Paste this into Claude Code for your final exam:</p>
+      <pre>Quiz me on a full-stack microservices architecture: Angular
+microfrontends under single-spa, a NestJS BFF, Spring Boot services
+each with their own database, Camunda 8 for workflow orchestration, and
+Kafka for events. Ask me 10 questions one at a time, wait for my answer,
+then correct me using a food-court analogy (stalls, a floor manager, an
+order kiosk, kitchens, a steward's checklist, a ticket rail). Mix
+concept questions with "what breaks if…" scenarios. Score me out of 10
+at the end and tell me my weakest topic.</pre>
+      <p><b>Acceptance criteria</b></p>
+      <div class="check">You answered all 10 and got a score with a named weakest topic.</div>
+      <div class="check">For your weakest topic, you re-read that track's modules (use the map: T1 UI, T2 BFF, T3 kitchens, T4 checklist, T5 rail).</div>
+      <div class="check">You can name one thing you would build next to prove it stuck (ideas below).</div>
+    </div>
+  </section>
+
+  <section class="quiz"><div class="eyebrow">Final Knowledge Check</div></section>
+
+  <section>
+    <div class="recap">In the food court, <b>six independent decisions — counters, a floor manager, one kiosk, separate kitchens, a checklist, and a ticket rail — added up to a building that never closes</b>; that is modern full-stack architecture, and you have now built every piece of it.</div>
+  </section>
+  <section class="next">There is no next module — take the map, open a terminal, and extend your food court: add the Juice Counter MFE, model a delivery process in BPMN, or build an order.ready dashboard. The Spice Route is yours now. 🍛</section>
+  `,
+  quiz:[
+    {q:"A team wants to ship a brand-new Juice Counter UI next week without touching or redeploying anything else. The enabling piece is…",
+     options:["A bigger Angular app","A new microfrontend registered in the single-spa root config","A new Kafka topic","A Camunda task"],answer:1,
+     why:"New crew, new counter, one new row on Farid's clipboard — nobody else's code moves."},
+    {q:"Payment must be retried on failure, visible to operations, and changeable by business analysts without redeploying code. Best fit…",
+     options:["More try/catch in the BFF","A Camunda BPMN process with the payment as a task","A Kafka topic","An Angular service"],answer:1,
+     why:"Retries, visibility (Operate), and a diagram non-developers can change: that is exactly Meenakshi's checklist."},
+    {q:"The kitchen service crashed for an hour during the rush, yet no orders were lost and no other service failed. Which two properties saved the night?",
+     options:["HTTP retries and caching","Kafka retention + consumer offsets, and services decoupled by events instead of synchronous calls","Load balancing and CDNs","H2 and JPA"],answer:1,
+     why:"Tickets waited on the rail (retention), the kitchen resumed where it left off (offsets), and Billing never noticed (decoupling)."}
+  ]
+}
+/* Claude Code: append m02..m18 here via /build-module. Keep id order. */
+];
+
+/* ============================ Player engine ============================ */
+const trackOrder=["T0","T1","T2","T3","T4","T5","T6"];
+function renderNav(active){
+  const byTrack={};
+  MODS.forEach(m=>{(byTrack[m.track]=byTrack[m.track]||[]).push(m)});
+  document.getElementById('navList').innerHTML = trackOrder
+    .filter(t=>byTrack[t])
+    .map(t=>`<div class="track">${t} · ${byTrack[t][0].trackName}</div>`+
+      byTrack[t].map(m=>`<a href="#${m.id}" class="${m.id===active?'active':''}"
+        onclick="show('${m.id}');return false;">${m.id.toUpperCase()} — ${m.title}</a>`).join('')
+    ).join('');
+}
+function ticket(m){
+  return `<header class="ticket">
+    <div class="row"><span>${m.trackName} Stall · ${m.track}</span><span>Token №${m.id.slice(1)}</span></div>
+    <h1>${m.title}</h1>
+    <div class="meta">≈ ${m.minutes} min · ${m.analogyBeat}</div>
+    <div class="concepts">${m.concepts.map(c=>`<span>${c}</span>`).join('')}</div>
+  </header>`;
+}
+let currentId=null;
+function show(id){
+  const i=MODS.findIndex(m=>m.id===id); if(i<0)return;
+  currentId=id;
+  const m=MODS[i];
+  document.getElementById('main').innerHTML =
+    ticket(m)+m.html+
+    `<div class="navBtns">
+      <button ${i===0?'disabled':''} onclick="show('${MODS[i-1]?.id}')">← Prev</button>
+      <button ${i===MODS.length-1?'disabled':''} onclick="show('${MODS[i+1]?.id}')">Next →</button>
+    </div>`;
+  renderNav(id); wireLabs(); wireQuiz(m);
+  window.scrollTo(0,0); document.getElementById('nav').classList.remove('open');
+  location.hash=id;
+}
+function wireLabs(){
+  document.querySelectorAll('.lab').forEach(lab=>{
+    lab.querySelectorAll('.tabs button').forEach(btn=>{
+      btn.onclick=()=>{
+        lab.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+        lab.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+        btn.classList.add('on');
+        lab.querySelector(`.pane[data-pane="${btn.dataset.pane}"]`).classList.add('on');
+      };
+    });
+  });
+}
+function wireQuiz(m){
+  const host=document.querySelector('.quiz'); if(!host||!m.quiz)return;
+  m.quiz.forEach((q,qi)=>{
+    const d=document.createElement('div'); d.className='q';
+    d.innerHTML=`<p><b>Q${qi+1}.</b> ${q.q}</p>`+
+      q.options.map((o,oi)=>`<button class="opt" data-oi="${oi}">${o}</button>`).join('')+
+      `<div class="why">✔ ${q.why}</div>`;
+    d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(d.classList.contains('done'))return;
+      d.classList.add('done');
+      b.classList.add(+b.dataset.oi===q.answer?'right':'wrong');
+      d.querySelectorAll('.opt')[q.answer].classList.add('right');
+    });
+    host.appendChild(d);
+  });
+}
+document.getElementById('menuBtn').onclick=()=>document.getElementById('nav').classList.toggle('open');
+window.addEventListener('hashchange',()=>{
+  const id=location.hash.slice(1);
+  if(id&&id!==currentId)show(id);   // back/forward & manual #mXX edits
+});
+show(location.hash?location.hash.slice(1):MODS[0].id);
+</script>
+</body>
+</html>

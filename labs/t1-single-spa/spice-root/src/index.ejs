@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Spice Route — Food Court Floor</title>
+  <!-- The van-parking registry: app name → where its JavaScript loads from -->
+  <script type="systemjs-importmap">
+    {
+      "imports": {
+        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js",
+        "@spiceroute/root-config": "//localhost:9000/spiceroute-root-config.js",
+        "biryani-counter": "//localhost:4201/main.js",
+        "dosa-counter": "//localhost:4202/main.js"
+      }
+    }
+  </script>
+  <!-- Angular MFEs need zone.js once, at the floor level -->
+  <script src="https://cdn.jsdelivr.net/npm/zone.js@0.15.1/bundles/zone.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.14.3/dist/system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.14.3/dist/extras/amd.min.js"></script>
+</head>
+<body>
+  <script>
+    System.import('@spiceroute/root-config');
+  </script>
+</body>
+</html>

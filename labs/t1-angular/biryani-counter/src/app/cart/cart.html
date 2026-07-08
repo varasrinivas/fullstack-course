@@ -1,0 +1,5 @@
+<h2>Your Tray</h2>
+<ul>
+  @for (item of cart.items; track $index) { <li>{{ item }}</li> }
+  @empty { <li>Nothing yet — go add some biryani!</li> }
+</ul>
